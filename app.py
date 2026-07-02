@@ -132,21 +132,21 @@ if selected_year <= 2025:
         hovertemplate='<b>%{x}</b><br>Avg price: %{y:,.2f}<extra></extra>'
     ))
 
-    # Layout configurations matching your format syntax
+    # Layout configurations cleaned up with single-level keys for Python 3.14 stability
     fig_hist.update_layout(
         barmode='group', 
         height=450,
         yaxis=dict(
             title='Qty sold (bags)',
-            titlefont=dict(color='steelblue'),
-            tickfont=dict(color='steelblue'),
+            titlefont_color='steelblue',
+            tickfont_color='steelblue',
             showgrid=False,
             rangemode='tozero'
         ),
         yaxis2=dict(
             title='Avg price',
-            titlefont=dict(color='coral'),
-            tickfont=dict(color='coral'),
+            titlefont_color='coral',
+            tickfont_color='coral',
             overlaying='y',
             side='right',
             showgrid=False,
@@ -162,7 +162,6 @@ if selected_year <= 2025:
         margin=dict(t=80, b=40, l=60, r=60)
     )
 
-    # Explicit axis updating format matching your reference block
     fig_hist.update_xaxes(
         categoryorder='array',
         categoryarray=MONTH_ORDER,
