@@ -12,22 +12,38 @@ st.set_page_config(
 )
 
 # ── Password gate (Stateful) ──────────────────────────────────────────────────
+# ── Password gate (Stateful, Centered & Completely Clean) ─────────────────────
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # Create 3 columns: Left padding (3.5 parts), Center content (3 parts), Right padding (3.5 parts)
-    # This keeps the form exactly 30% width and perfectly centered on a wide layout
+    # Inject aggressive CSS to target and hide all form instruction and caption elements
+    st.markdown(
+        """
+        <style>
+        /* Hide the 'Press Enter to submit form' text explicitly */
+        [data-testid="stWidgetInstructions"] {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0px !important;
+        }
+        /* Extra safety to ensure no paragraph instructions render inside the input container */
+        div[data-testid="stTextInput"] p {
+            display: none !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     
     with center_col:
         st.markdown("<h2 style='text-align: center;'>🔒 Secure Access</h2>", unsafe_allow_html=True)
         
-        # Wrapping in a form removes the "Press Enter to apply" hint text entirely
         with st.form(key='login_form', clear_on_submit=False):
             password = st.text_input('Enter password', type='password', label_visibility='collapsed')
             
-            # Sub-columns inside the form to center-align the button
             btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
             with btn_col:
                 submit_button = st.form_submit_button(label='Login', use_container_width=True)
@@ -35,11 +51,11 @@ if not st.session_state['authenticated']:
         if submit_button:
             if password == st.secrets['APP_PASSWORD']:
                 st.session_state['authenticated'] = True
-                st.rerun()  # Redraws app immediately to remove login elements
+                st.rerun()  
             else:
                 st.error('Incorrect password.')
     st.stop()
-    
+
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data
 def load_data():
