@@ -409,9 +409,12 @@ else:
             hist_display[['year', 'month']].assign(day=1)
         ).dt.strftime('%b %Y')
 
-        hist_display['Purchased'] = hist_display['purchased'].map(
-            {1: '✅ Yes', 0: '❌ No'}
-        )
+        hist_display['purchased'] = hist_display['purchased'].fillna(0).astype(int)
+        hist_display['Purchased'] = hist_display['purchased'].map({
+            1: '✅ Yes', 
+            0: '❌ No'
+        })
+
         hist_display['Qty']     = hist_display['Qty'].astype(int)
         hist_display['Average'] = hist_display['Average'].round(2)
 
