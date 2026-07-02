@@ -1,18 +1,29 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
+import altair as alt
 
-# ── Password gate ─────────────────────────────────────────────────────────────
-# password = st.text_input('Enter password to access the app', type='password')
-# if password != st.secrets['APP_PASSWORD']:
-#     st.warning('Incorrect password. Please try again.')
-#     st.stop()
+# ── Page config ───────────────────────────────────────────────────────────────
+# Must be the very first Streamlit command called
+st.set_page_config(
+    page_title='Tea Buyer Forecast',
+    page_icon='🍵',
+    layout='wide'
+)
 
-password = st.text_input('Enter password', type='password')
-if password != st.secrets['APP_PASSWORD']:
-    st.warning('Incorrect password.')
+# ── Password gate (Stateful) ──────────────────────────────────────────────────
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+if not st.session_state['authenticated']:
+    st.title('🔒 Secure Access')
+    password = st.text_input('Enter password', type='password')
+    if st.button('Login'):
+        if password == st.secrets['APP_PASSWORD']:
+            st.session_state['authenticated'] = True
+            st.rerun()  # Instantly redraws the app, clearing this input box
+        else:
+            st.error('Incorrect password.')
     st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
@@ -24,13 +35,7 @@ def load_data():
 
 forecast, historical = load_data()
 
-# ── Page config ───────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title='Tea Buyer Forecast',
-    page_icon='🍵',
-    layout='wide'
-)
-
+# ── Main Application Interface ────────────────────────────────────────────────
 st.title('🍵 Specialty Tea Buyer Forecast')
 st.write('Select a buyer and grade to see their forecast and purchase history.')
 
@@ -38,12 +43,10 @@ st.write('Select a buyer and grade to see their forecast and purchase history.')
 col1, col2 = st.columns(2)
 
 with col1:
-    # All unique buyers, sorted alphabetically, each appearing only once
     buyer_list = sorted(forecast['Buyer_Name'].unique().tolist())
     selected_buyer = st.selectbox('Select buyer', buyer_list)
 
 with col2:
-    # Only show grades that exist for the selected buyer
     grade_list = sorted(
         forecast[forecast['Buyer_Name'] == selected_buyer]['Grade']
         .unique().tolist()
@@ -67,44 +70,49 @@ if grp.empty:
 st.divider()
 
 # ═════════════════════════════════════════════════════════════════════════════
-# OUTPUT 1 — Bar chart
+# OUTPUT 1 — Interactive Altair Dual Axis Bar Chart
 # ═════════════════════════════════════════════════════════════════════════════
 st.subheader(f'📊 Monthly forecast — {selected_buyer} · {selected_grade}')
 
-fig, ax1 = plt.subplots(figsize=(14, 5))
-x      = range(len(grp))
-bar_w  = 0.4
+# Base configuration shared across both bars
+base = alt.Chart(grp).encode(
+    x=alt.X('month_label:N', title='Month', sort=None)
+)
 
-# Left axis — buy probability
-ax1.bar(x, grp['avg_buy_probability'],
-        width=bar_w, color='steelblue', alpha=0.8,
-        label='Buy probability')
-ax1.set_ylabel('Buy probability', color='steelblue', fontsize=11)
-ax1.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
-ax1.set_ylim(0, 1)
-ax1.tick_params(axis='y', labelcolor='steelblue')
+# Left Side Chart: Buy Probability
+bar1 = base.mark_bar(color='steelblue', opacity=0.8).encode(
+    y=alt.Y('avg_buy_probability:Q', 
+            title='Buy probability', 
+            axis=alt.Axis(format='%', titleColor='steelblue', labelColor='steelblue'),
+            scale=alt.Scale(domain=[0, 1])),
+    tooltip=[
+        alt.Tooltip('month_label:N', title='Month'),
+        alt.Tooltip('avg_buy_probability:Q', title='Buy Probability', format='.1%')
+    ]
+)
 
-# Right axis — expected quantity
-ax2 = ax1.twinx()
-ax2.bar([i + bar_w for i in x], grp['expected_qty'],
-        width=bar_w, color='coral', alpha=0.8,
-        label='Expected qty (bags)')
-ax2.set_ylabel('Expected quantity (bags)', color='coral', fontsize=11)
-ax2.tick_params(axis='y', labelcolor='coral')
+# Right Side Chart: Expected Quantity
+bar2 = base.mark_bar(color='coral', opacity=0.8).encode(
+    y=alt.Y('expected_qty:Q', 
+            title='Expected quantity (bags)', 
+            axis=alt.Axis(titleColor='coral', labelColor='coral')),
+    tooltip=[
+        alt.Tooltip('month_label:N', title='Month'),
+        alt.Tooltip('expected_qty:Q', title='Expected Qty (bags)', format=',.0f')
+    ]
+)
 
-ax1.set_xticks([i + bar_w / 2 for i in x])
-ax1.set_xticklabels(grp['month_label'], rotation=45, ha='right')
+# Layer them together using an independent scale for the second y-axis
+interactive_chart = alt.layer(bar1, bar2).resolve_scale(
+    y='independent'
+).properties(
+    width='container',
+    height=400
+).configure_axisX(
+    labelAngle=45
+)
 
-legend_handles = [
-    plt.Rectangle((0,0),1,1, color='steelblue', alpha=0.8),
-    plt.Rectangle((0,0),1,1, color='coral',     alpha=0.8)
-]
-ax1.legend(legend_handles,
-           ['Buy probability', 'Expected qty (bags)'],
-           loc='upper left')
-
-plt.tight_layout()
-st.pyplot(fig)
+st.altair_chart(interactive_chart, use_container_width=True)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # OUTPUT 2 — Forecast table
@@ -172,7 +180,6 @@ hist = (
 if hist.empty:
     st.info('No historical data found for this buyer and grade combination.')
 else:
-    # Build a clean readable version for display
     hist_display = hist[[
         'year', 'month', 'Qty', 'Average', 'purchased'
     ]].copy()
