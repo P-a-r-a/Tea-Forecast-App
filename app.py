@@ -260,37 +260,42 @@ else:
     ))
 
     fig.update_layout(
-        barmode='group',
-        height=450,
-        xaxis=dict(
-            title='Month',
-            categoryorder='array',
-            categoryarray=MONTH_ORDER
-        ),
-        yaxis=dict(
-            title='Buy probability',
-            tickformat='.0%',
-            titlefont=dict(color='steelblue'),
-            tickfont=dict(color='steelblue'),
-            range=[0, 1],
-            showgrid=False
-        ),
-        yaxis2=dict(
-            title='Quantity (bags)',
-            titlefont=dict(color='coral'),
-            tickfont=dict(color='coral'),
-            overlaying='y',
-            side='right',
-            showgrid=False
-        ),
-        legend=dict(
-            orientation='h',
-            yanchor='bottom',
-            y=1.02,
-            xanchor='right',
-            x=1
-        ),
-        margin=dict(t=80, b=40, l=60, r=60)
+    barmode='group',
+    height=450,
+    legend=dict(
+        orientation='h',
+        yanchor='bottom',
+        y=1.02,
+        xanchor='right',
+        x=1
+    ),
+    margin=dict(t=80, b=40, l=60, r=60)
+    )
+
+    fig.update_xaxes(
+        title_text='Month',
+        categoryorder='array',
+        categoryarray=MONTH_ORDER
+    )
+
+    fig.update_yaxes(
+        title_text='Buy probability',
+        tickformat='.0%',
+        titlefont=dict(color='steelblue'),
+        tickfont=dict(color='steelblue'),
+        range=[0, 1],
+        showgrid=False,
+        selector=dict(type='linear')
+    )
+
+    fig.update_yaxes(
+        title_text='Quantity (bags)',
+        titlefont=dict(color='coral'),
+        tickfont=dict(color='coral'),
+        overlaying='y',
+        side='right',
+        showgrid=False,
+        secondary_y=True
     )
 
     st.plotly_chart(fig, use_container_width=True)
