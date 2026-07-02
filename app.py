@@ -244,12 +244,35 @@ else:
 
     # Bar 3 — Weighted qty (right y-axis, same scale as predicted qty)
     # Tooltip also shows both values
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        name='Buy probability',
+        x=fcst_plot['month_label'],
+        y=fcst_plot['avg_buy_probability'],
+        marker_color='steelblue',
+        hovertemplate='<b>%{x}</b><br>Buy probability: %{y:.1%}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Bar(
+        name='Predicted qty (bags)',
+        x=fcst_plot['month_label'],
+        y=fcst_plot['expected_qty'],
+        marker_color='coral',
+        customdata=fcst_plot['probability_wtd_qty'],
+        hovertemplate=(
+            '<b>%{x}</b><br>'
+            'Predicted qty: %{y:,.1f} bags<br>'
+            'Weighted qty: %{customdata:,.1f} bags'
+            '<extra></extra>'
+        )
+    ))
+
     fig.add_trace(go.Bar(
         name='Weighted qty (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['probability_wtd_qty'],
         marker_color='seagreen',
-        yaxis='y2',
         customdata=fcst_plot['expected_qty'],
         hovertemplate=(
             '<b>%{x}</b><br>'
@@ -259,43 +282,11 @@ else:
         )
     ))
 
-    fig.update_layout(
-    barmode='group',
-    height=450,
-    legend=dict(
-        orientation='h',
-        yanchor='bottom',
-        y=1.02,
-        xanchor='right',
-        x=1
-    ),
-    margin=dict(t=80, b=40, l=60, r=60)
-    )
-
+    fig.update_layout(barmode='group', height=450)
     fig.update_xaxes(
-        title_text='Month',
         categoryorder='array',
-        categoryarray=MONTH_ORDER
-    )
-
-    fig.update_yaxes(
-        title_text='Buy probability',
-        tickformat='.0%',
-        titlefont=dict(color='steelblue'),
-        tickfont=dict(color='steelblue'),
-        range=[0, 1],
-        showgrid=False,
-        selector=dict(type='linear')
-    )
-
-    fig.update_yaxes(
-        title_text='Quantity (bags)',
-        titlefont=dict(color='coral'),
-        tickfont=dict(color='coral'),
-        overlaying='y',
-        side='right',
-        showgrid=False,
-        secondary_y=True
+        categoryarray=MONTH_ORDER,
+        title_text='Month'
     )
 
     st.plotly_chart(fig, use_container_width=True)
