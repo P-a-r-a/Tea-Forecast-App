@@ -338,7 +338,7 @@ else:
     display_table = forecast_table.copy()
 
     if show_above_50:
-        mask = fcst_plot['avg_buy_probability'] > 0.5
+        mask = fcst_plot['avg_buy_probability'] >= 0.5
         display_table = forecast_table[mask.values].reset_index(drop=True)
 
         if display_table.empty:
