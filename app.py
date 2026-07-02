@@ -16,65 +16,14 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # Inject custom CSS to increase input height and position the internal hint text
-    st.markdown(
-        """
-        <style>
-        /* Increase the height of the input box field itself */
-        div[data-testid="stTextInput"] input {
-            height: 52px !important;       /* Increases height slightly */
-            font-size: 1.1rem !important;   /* Scales up text slightly for proportions */
-            padding-right: 45px !important; /* Leaves room for the visibility icon */
-        }
-        
-        /* Adjust the visibility toggle icon container to center with the new height */
-        div[data-testid="stTextInput"] button[data-testid="stBaseButton-icon"] {
-            top: 6px !important;
-        }
-
-        /* Target and center the 'Press Enter to submit form' hint text */
-        div[data-testid="stTextInput"] [data-testid="stWidgetInstructions"] {
-            position: absolute !important;
-            bottom: auto !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important; /* Perfectly centers vertically */
-            right: 50px !important;                /* Positions it just to the left of the eye icon */
-            font-size: 0.75rem !important;
-            color: #808495 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            pointer-events: none;                  /* Ensures click actions pass straight through to the box */
-        }
-        
-        /* Add some room below the input box container so it doesn't crowd the button */
-        div[data-testid="stTextInput"] {
-            margin-bottom: 15px !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # 3-column layout to constrain width and center the form horizontally
-    pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
-    
-    with center_col:
-        st.markdown("<h2 style='text-align: center;'>🔒 Secure Access</h2>", unsafe_allow_html=True)
-        
-        with st.form(key='login_form', clear_on_submit=False):
-            password = st.text_input('Enter password', type='password', label_visibility='collapsed')
-            
-            # Sub-columns to cleanly center the login button inside the form box
-            btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
-            with btn_col:
-                submit_button = st.form_submit_button(label='Login', use_container_width=True)
-                
-        if submit_button:
-            if password == st.secrets['APP_PASSWORD']:
-                st.session_state['authenticated'] = True
-                st.rerun()  
-            else:
-                st.error('Incorrect password.')
+    st.title('🔒 Secure Access')
+    password = st.text_input('Enter password', type='password')
+    if st.button('Login'):
+        if password == st.secrets['APP_PASSWORD']:
+            st.session_state['authenticated'] = True
+            st.rerun()  # Instantly redraws the app, clearing this input box
+        else:
+            st.error('Incorrect password.')
     st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
