@@ -21,8 +21,8 @@ if not st.session_state['authenticated']:
         """
         <style>
         div[data-testid="stTextInput"] input {
-            height: 48px !important;       /* Increases height slightly */
-            font-size: 1.05rem !important;  /* Scales font slightly to match */
+            height: 50px !important;       /* Increases height slightly */
+
         }
         </style>
         """,
