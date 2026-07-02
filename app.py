@@ -10,6 +10,11 @@ import matplotlib.ticker as mtick
 #     st.warning('Incorrect password. Please try again.')
 #     st.stop()
 
+password = st.text_input('Enter password', type='password')
+if password != st.secrets['APP_PASSWORD']:
+    st.warning('Incorrect password.')
+    st.stop()
+
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data
 def load_data():
