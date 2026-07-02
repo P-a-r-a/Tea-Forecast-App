@@ -57,20 +57,13 @@ ALL_MONTHS  = pd.DataFrame({
 st.title('☕ Specialty Tea Buyer Forecast')
 st.write('Select a buyer, year, and grade to see their monthly forecast.')
 
-# ── Three dropdowns: Buyer | Year | Grade ─────────────────────────────────────
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    buyer_list     = sorted(forecast['Buyer_Name'].unique().tolist())
+# ── Sidebar: Buyer | Year | Grade ─────────────────────────────────────
+with st.sidebar:
+    st.header("🔍 Filter Options")
+    buyer_list = sorted(forecast['Buyer_Name'].unique().tolist())
     selected_buyer = st.selectbox('Select buyer', buyer_list)
-
-with col2:
-    selected_year  = st.selectbox('Select year', list(range(2023, 2031)))
-
-with col3:
+    selected_year = st.selectbox('Select year', list(range(2023, 2031)))
     selected_grade = st.selectbox('Select grade', ALL_GRADES)
-
-st.divider()
 
 # ═════════════════════════════════════════════════════════════════════════════
 # HISTORICAL YEARS (2023 – 2025)
