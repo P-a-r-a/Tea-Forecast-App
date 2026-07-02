@@ -105,54 +105,78 @@ if selected_year <= 2025:
         0.0
     )
 
-    # ── Dual bar chart (Altair) ───────────────────────────────────────────────
+   # ── Dual bar chart (Plotly) ───────────────────────────────────────────────
     st.subheader(
         f'📊 Monthly sales — {selected_buyer} · {selected_grade} · {selected_year}'
     )
 
-    bar_qty = alt.Chart(hist_plot).mark_bar(size=14).encode(
-        x=alt.X('month_label:N', title='Month', sort=MONTH_ORDER),
-        xOffset=alt.value(-8),
-        y=alt.Y(
-            'Qty:Q',
-            title='Qty sold (bags)',
-            axis=alt.Axis(titleColor='steelblue', labelColor='steelblue')
+    fig_hist = go.Figure()
+
+    fig_hist.add_trace(go.Bar(
+        name='Qty sold (bags)',
+        x=hist_plot['month_label'],
+        y=hist_plot['Qty'],
+        marker_color='steelblue',
+        yaxis='y1',
+        hovertemplate=(
+            '<b>%{x}</b><br>'
+            'Qty sold: %{y:,.0f} bags'
+            '<extra></extra>'
+        )
+    ))
+
+    fig_hist.add_trace(go.Bar(
+        name='Avg price',
+        x=hist_plot['month_label'],
+        y=hist_plot['Average'],
+        marker_color='coral',
+        yaxis='y2',
+        hovertemplate=(
+            '<b>%{x}</b><br>'
+            'Avg price: %{y:,.2f}'
+            '<extra></extra>'
+        )
+    ))
+
+    fig_hist.update_layout(
+        barmode='group',
+        height=450,
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
         ),
-        color=alt.value('steelblue'),
-        tooltip=[
-            alt.Tooltip('month_label:N', title='Month'),
-            alt.Tooltip('Qty:Q',         title='Qty sold (bags)',
-                        format=',.0f')
-        ]
+        margin=dict(t=80, b=40, l=60, r=60)
     )
 
-    bar_avg = alt.Chart(hist_plot).mark_bar(size=14).encode(
-        x=alt.X('month_label:N', title='Month', sort=MONTH_ORDER),
-        xOffset=alt.value(8),
-        y=alt.Y(
-            'Average:Q',
-            title='Avg price',
-            axis=alt.Axis(titleColor='coral', labelColor='coral')
-        ),
-        color=alt.value('coral'),
-        tooltip=[
-            alt.Tooltip('month_label:N', title='Month'),
-            alt.Tooltip('Average:Q',     title='Avg price', format=',.2f')
-        ]
+    fig_hist.update_xaxes(
+        title_text='Month',
+        categoryorder='array',
+        categoryarray=MONTH_ORDER
     )
 
-    chart_hist = alt.layer(bar_qty, bar_avg).resolve_scale(
-        y='independent'
-    ).properties(
-        width='container',
-        height=400
-    ).configure_axisX(labelAngle=0)
+    fig_hist.update_yaxes(
+        title_text='Qty sold (bags)',
+        titlefont=dict(color='steelblue'),
+        tickfont=dict(color='steelblue'),
+        showgrid=False,
+        rangemode='tozero'
+    )
 
-    leg1, leg2, _ = st.columns([1, 1, 6])
-    leg1.markdown('🟦 Qty sold (bags)')
-    leg2.markdown('🟥 Avg price')
+    fig_hist.update_yaxes(
+        title_text='Avg price',
+        titlefont=dict(color='coral'),
+        tickfont=dict(color='coral'),
+        overlaying='y',
+        side='right',
+        showgrid=False,
+        rangemode='tozero',
+        secondary_y=True
+    )
 
-    st.altair_chart(chart_hist, use_container_width=True)
+    st.plotly_chart(fig_hist, use_container_width=True)
 
     # ── Single table — mirrors chart data ─────────────────────────────────────
     st.subheader('📋 Monthly sales table')
