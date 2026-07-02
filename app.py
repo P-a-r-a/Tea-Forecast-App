@@ -370,7 +370,7 @@ else:
     st.divider()
 
     show_above_50 = st.toggle(
-        'Show only months where buy probability > 50%',
+        'Show only months with 🟢 High probability',
         value=False
     )
 
