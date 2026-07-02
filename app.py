@@ -45,11 +45,13 @@ def load_data():
 forecast, historical = load_data()
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-ALL_GRADES   = ['GOLDENTIPS', 'INNOVATIVE', 'SILVERTIPS']
-MONTH_ORDER  = ['Jan','Feb','Mar','Apr','May','Jun',
-                'Jul','Aug','Sep','Oct','Nov','Dec']
-ALL_MONTHS   = pd.DataFrame({'month': range(1, 13),
-                             'month_label': MONTH_ORDER})
+ALL_GRADES  = ['GOLDENTIPS', 'INNOVATIVE', 'SILVERTIPS']
+MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun',
+               'Jul','Aug','Sep','Oct','Nov','Dec']
+ALL_MONTHS  = pd.DataFrame({
+    'month':       range(1, 13),
+    'month_label': MONTH_ORDER
+})
 
 # ── Main UI ───────────────────────────────────────────────────────────────────
 st.title('🍵 Specialty Tea Buyer Forecast')
@@ -75,14 +77,12 @@ st.divider()
 # ═════════════════════════════════════════════════════════════════════════════
 if selected_year <= 2025:
 
-    # Filter historical data for this buyer / grade / year
     hist_raw = historical[
         (historical['Buyer_Name'] == selected_buyer) &
         (historical['Grade']      == selected_grade)  &
         (historical['year']       == selected_year)
     ].copy()
 
-    # Check if any data exists for this combination at all
     if hist_raw.empty:
         st.info(
             f'**{selected_buyer}** had no activity related to '
@@ -91,8 +91,6 @@ if selected_year <= 2025:
         st.stop()
 
     # Merge onto 12-month scaffold
-    # Use 0 for Qty on non-purchased months
-    # Use NaN for Average on non-purchased months (shown as 0 in chart)
     hist_plot = ALL_MONTHS.merge(
         hist_raw[['month', 'Qty', 'Average', 'purchased']],
         on='month', how='left'
@@ -100,14 +98,14 @@ if selected_year <= 2025:
     hist_plot['Qty']       = hist_plot['Qty'].fillna(0).astype(float)
     hist_plot['purchased'] = hist_plot['purchased'].fillna(0).astype(int)
 
-    # Average price — only show for purchased months; 0 otherwise
+    # Average price only on purchased months — 0 otherwise
     hist_plot['Average'] = np.where(
         hist_plot['purchased'] == 1,
         hist_plot['Average'].fillna(0),
         0.0
     )
 
-    # ── Dual bar chart ────────────────────────────────────────────────────────
+    # ── Dual bar chart (Altair) ───────────────────────────────────────────────
     st.subheader(
         f'📊 Monthly sales — {selected_buyer} · {selected_grade} · {selected_year}'
     )
@@ -123,7 +121,8 @@ if selected_year <= 2025:
         color=alt.value('steelblue'),
         tooltip=[
             alt.Tooltip('month_label:N', title='Month'),
-            alt.Tooltip('Qty:Q',         title='Qty sold (bags)', format=',.0f')
+            alt.Tooltip('Qty:Q',         title='Qty sold (bags)',
+                        format=',.0f')
         ]
     )
 
@@ -155,7 +154,7 @@ if selected_year <= 2025:
 
     st.altair_chart(chart_hist, use_container_width=True)
 
-    # ── Single table — same data as chart ─────────────────────────────────────
+    # ── Single table — mirrors chart data ─────────────────────────────────────
     st.subheader('📋 Monthly sales table')
 
     sales_table = hist_plot[['month_label', 'Qty', 'Average']].copy()
@@ -182,14 +181,12 @@ if selected_year <= 2025:
 # ═════════════════════════════════════════════════════════════════════════════
 else:
 
-    # Filter forecast data for this buyer / grade / year
     fcst_raw = forecast[
         (forecast['Buyer_Name'] == selected_buyer) &
         (forecast['Grade']      == selected_grade)  &
         (forecast['year']       == selected_year)
     ].copy()
 
-    # Check if any data exists for this combination
     if fcst_raw.empty:
         st.info(
             f'**{selected_buyer}** had no activity related to '
@@ -207,9 +204,9 @@ else:
     fcst_plot['expected_qty']        = fcst_plot['expected_qty'].fillna(0)
     fcst_plot['probability_wtd_qty'] = fcst_plot['probability_wtd_qty'].fillna(0)
 
-    # ── Three-bar chart ───────────────────────────────────────────────────────
+    # ── Triple bar chart (Plotly) ─────────────────────────────────────────────
     st.subheader(
-         f'📊 Monthly forecast — {selected_buyer} · {selected_grade} · {selected_year}'
+        f'📊 Monthly forecast — {selected_buyer} · {selected_grade} · {selected_year}'
     )
 
     fig = go.Figure()
@@ -221,42 +218,45 @@ else:
         y=fcst_plot['avg_buy_probability'],
         marker_color='steelblue',
         yaxis='y1',
-        text=(fcst_plot['avg_buy_probability'] * 100).round(1).astype(str) + '%',
-        textposition='outside',
         hovertemplate=(
             '<b>%{x}</b><br>'
-            'Buy probability: %{y:.1%}<extra></extra>'
+            'Buy probability: %{y:.1%}'
+            '<extra></extra>'
         )
     ))
 
     # Bar 2 — Predicted qty (right y-axis)
+    # Tooltip shows both predicted qty and weighted qty
     fig.add_trace(go.Bar(
         name='Predicted qty (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['expected_qty'],
         marker_color='coral',
         yaxis='y2',
+        customdata=fcst_plot['probability_wtd_qty'],
         hovertemplate=(
             '<b>%{x}</b><br>'
             'Predicted qty: %{y:,.1f} bags<br>'
-            'Weighted qty: %{customdata:,.1f} bags<extra></extra>'
-        ),
-        customdata=fcst_plot['probability_wtd_qty']
+            'Weighted qty: %{customdata:,.1f} bags'
+            '<extra></extra>'
+        )
     ))
 
     # Bar 3 — Weighted qty (right y-axis, same scale as predicted qty)
+    # Tooltip also shows both values
     fig.add_trace(go.Bar(
         name='Weighted qty (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['probability_wtd_qty'],
         marker_color='seagreen',
         yaxis='y2',
+        customdata=fcst_plot['expected_qty'],
         hovertemplate=(
             '<b>%{x}</b><br>'
             'Predicted qty: %{customdata:,.1f} bags<br>'
-            'Weighted qty: %{y:,.1f} bags<extra></extra>'
-        ),
-        customdata=fcst_plot['expected_qty']
+            'Weighted qty: %{y:,.1f} bags'
+            '<extra></extra>'
+        )
     ))
 
     fig.update_layout(
@@ -272,14 +272,16 @@ else:
             tickformat='.0%',
             titlefont=dict(color='steelblue'),
             tickfont=dict(color='steelblue'),
-            range=[0, 1]
+            range=[0, 1],
+            showgrid=False
         ),
         yaxis2=dict(
             title='Quantity (bags)',
             titlefont=dict(color='coral'),
             tickfont=dict(color='coral'),
             overlaying='y',
-            side='right'
+            side='right',
+            showgrid=False
         ),
         legend=dict(
             orientation='h',
@@ -288,9 +290,7 @@ else:
             xanchor='right',
             x=1
         ),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        margin=dict(t=60, b=40, l=60, r=60)
+        margin=dict(t=80, b=40, l=60, r=60)
     )
 
     st.plotly_chart(fig, use_container_width=True)
