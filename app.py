@@ -229,28 +229,25 @@ else:
 
     fig = go.Figure()
 
-    # Bar 1 — Buy probability (left y-axis)
+    # Bar 1 — Buy probability (left y-axis, y1)
     fig.add_trace(go.Bar(
         name='Buy probability',
         x=fcst_plot['month_label'],
         y=fcst_plot['avg_buy_probability'],
         marker_color='steelblue',
         yaxis='y1',
-        hovertemplate=(
-            '<b>%{x}</b><br>'
-            'Buy probability: %{y:.1%}'
-            '<extra></extra>'
-        )
+        offsetgroup=1,
+        hovertemplate='<b>%{x}</b><br>Buy probability: %{y:.1%}<extra></extra>'
     ))
 
-    # Bar 2 — Predicted qty (right y-axis)
-    # Tooltip shows both predicted qty and weighted qty
+    # Bar 2 — Predicted qty (right y-axis, y2)
     fig.add_trace(go.Bar(
         name='Predicted qty (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['expected_qty'],
         marker_color='coral',
         yaxis='y2',
+        offsetgroup=2,
         customdata=fcst_plot['probability_wtd_qty'],
         hovertemplate=(
             '<b>%{x}</b><br>'
@@ -260,37 +257,14 @@ else:
         )
     ))
 
-    # Bar 3 — Weighted qty (right y-axis, same scale as predicted qty)
-    # Tooltip also shows both values
-    fig = go.Figure()
-
-    fig.add_trace(go.Bar(
-        name='Buy probability',
-        x=fcst_plot['month_label'],
-        y=fcst_plot['avg_buy_probability'],
-        marker_color='steelblue',
-        hovertemplate='<b>%{x}</b><br>Buy probability: %{y:.1%}<extra></extra>'
-    ))
-
-    fig.add_trace(go.Bar(
-        name='Predicted qty (bags)',
-        x=fcst_plot['month_label'],
-        y=fcst_plot['expected_qty'],
-        marker_color='coral',
-        customdata=fcst_plot['probability_wtd_qty'],
-        hovertemplate=(
-            '<b>%{x}</b><br>'
-            'Predicted qty: %{y:,.1f} bags<br>'
-            'Weighted qty: %{customdata:,.1f} bags'
-            '<extra></extra>'
-        )
-    ))
-
+    # Bar 3 — Weighted qty (right y-axis, y2)
     fig.add_trace(go.Bar(
         name='Weighted qty (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['probability_wtd_qty'],
         marker_color='seagreen',
+        yaxis='y2',
+        offsetgroup=3,
         customdata=fcst_plot['expected_qty'],
         hovertemplate=(
             '<b>%{x}</b><br>'
@@ -300,7 +274,37 @@ else:
         )
     ))
 
-    fig.update_layout(barmode='group', height=450)
+    # Layout configurations safely updated for Python 3.14 stability
+    fig.update_layout(
+        barmode='group', 
+        height=450,
+        yaxis=dict(
+            title_text='Buy probability',
+            title_font_color='steelblue',
+            tickfont_color='steelblue',
+            tickformat='.0%',
+            showgrid=True,
+            rangemode='tozero'
+        ),
+        yaxis2=dict(
+            title_text='Quantity (bags)',
+            title_font_color='coral',
+            tickfont_color='coral',
+            overlaying='y',
+            side='right',
+            showgrid=False,
+            rangemode='tozero'
+        ),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        margin=dict(t=80, b=40, l=60, r=60)
+    )
+
     fig.update_xaxes(
         categoryorder='array',
         categoryarray=MONTH_ORDER,
