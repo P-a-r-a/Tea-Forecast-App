@@ -112,40 +112,30 @@ if selected_year <= 2025:
 
     fig_hist = go.Figure()
 
+    # Bar 1 — Qty sold (bags) (left y-axis)
     fig_hist.add_trace(go.Bar(
         name='Qty sold (bags)',
         x=hist_plot['month_label'],
         y=hist_plot['Qty'],
         marker_color='steelblue',
         yaxis='y1',
-        hovertemplate=(
-            '<b>%{x}</b><br>'
-            'Qty sold: %{y:,.0f} bags'
-            '<extra></extra>'
-        )
+        hovertemplate='<b>%{x}</b><br>Qty sold: %{y:,.0f} bags<extra></extra>'
     ))
 
+    # Bar 2 — Avg price (right y-axis)
     fig_hist.add_trace(go.Bar(
         name='Avg price',
         x=hist_plot['month_label'],
         y=hist_plot['Average'],
         marker_color='coral',
         yaxis='y2',
-        hovertemplate=(
-            '<b>%{x}</b><br>'
-            'Avg price: %{y:,.2f}'
-            '<extra></extra>'
-        )
+        hovertemplate='<b>%{x}</b><br>Avg price: %{y:,.2f}<extra></extra>'
     ))
 
+    # Layout configurations matching your format syntax
     fig_hist.update_layout(
-        barmode='group',
+        barmode='group', 
         height=450,
-        xaxis=dict(
-            title='Month',
-            categoryorder='array',
-            categoryarray=MONTH_ORDER
-        ),
         yaxis=dict(
             title='Qty sold (bags)',
             titlefont=dict(color='steelblue'),
@@ -170,6 +160,13 @@ if selected_year <= 2025:
             x=1
         ),
         margin=dict(t=80, b=40, l=60, r=60)
+    )
+
+    # Explicit axis updating format matching your reference block
+    fig_hist.update_xaxes(
+        categoryorder='array',
+        categoryarray=MONTH_ORDER,
+        title_text='Month'
     )
 
     st.plotly_chart(fig_hist, use_container_width=True)
