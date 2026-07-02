@@ -119,6 +119,7 @@ if selected_year <= 2025:
         y=hist_plot['Qty'],
         marker_color='steelblue',
         yaxis='y1',
+        offsetgroup=1,  # <-- Added to prevent overlapping
         hovertemplate='<b>%{x}</b><br>Qty sold: %{y:,.0f} bags<extra></extra>'
     ))
 
@@ -129,6 +130,7 @@ if selected_year <= 2025:
         y=hist_plot['Average'],
         marker_color='coral',
         yaxis='y2',
+        offsetgroup=2,  # <-- Added to prevent overlapping
         hovertemplate='<b>%{x}</b><br>Avg price: %{y:,.2f}<extra></extra>'
     ))
 
