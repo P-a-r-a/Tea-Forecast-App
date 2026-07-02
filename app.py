@@ -293,41 +293,7 @@ else:
 
     st.divider()
 
-    # ── Filter toggle ─────────────────────────────────────────────────────────────
-    show_above_50 = st.toggle(
-        'Show only months where buy probability > 50%',
-        value=False
-    )
-
-    display_table = forecast_table.copy()
-
-    if show_above_50:
-        # Filter on the numeric probability before it was converted to string
-        mask = fcst_plot['avg_buy_probability'] > 0.5
-        display_table = forecast_table[mask.values].reset_index(drop=True)
-
-        if display_table.empty:
-            st.info(
-                f'No months in {selected_year} where **{selected_buyer}** '
-                f'has a predicted buy probability above 50% for **{selected_grade}**.'
-            )
-            st.stop()
-
-    # ── Forecast table ────────────────────────────────────────────────────────────
-    st.subheader('📋 Forecast table')
-    st.dataframe(display_table, use_container_width=True, hide_index=True)
-
-    st.download_button(
-        label='⬇ Download forecast as CSV',
-        data=display_table.to_csv(index=False),
-        file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
-        mime='text/csv',
-        key='download_forecast'
-)
-
-    # ── Forecast table ────────────────────────────────────────────────────────
-    st.subheader('📋 Forecast table')
-
+    # ── Build forecast_table first ────────────────────────────────────────────
     def likelihood(p):
         if p >= 0.7:   return '🟢 High'
         elif p >= 0.4: return '🟡 Medium'
@@ -361,11 +327,34 @@ else:
         'Predicted qty (bags)', 'Weighted qty (bags)'
     ]]
 
-    st.dataframe(forecast_table, use_container_width=True, hide_index=True)
+    # ── Filter toggle ─────────────────────────────────────────────────────────
+    st.divider()
+
+    show_above_50 = st.toggle(
+        'Show only months where buy probability > 50%',
+        value=False
+    )
+
+    display_table = forecast_table.copy()
+
+    if show_above_50:
+        mask = fcst_plot['avg_buy_probability'] > 0.5
+        display_table = forecast_table[mask.values].reset_index(drop=True)
+
+        if display_table.empty:
+            st.info(
+                f'No months in {selected_year} where **{selected_buyer}** '
+                f'has a predicted buy probability above 50% for **{selected_grade}**.'
+            )
+            st.stop()
+
+    # ── Forecast table ────────────────────────────────────────────────────────
+    st.subheader('📋 Forecast table')
+    st.dataframe(display_table, use_container_width=True, hide_index=True)
 
     st.download_button(
         label='⬇ Download forecast as CSV',
-        data=forecast_table.to_csv(index=False),
+        data=display_table.to_csv(index=False),
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
         mime='text/csv',
         key='download_forecast'
