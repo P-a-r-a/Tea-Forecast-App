@@ -12,37 +12,23 @@ st.set_page_config(
 )
 
 # ── Password gate (Stateful) ──────────────────────────────────────────────────
-# ── Password gate (Stateful, Centered & Completely Clean) ─────────────────────
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # Inject aggressive CSS to target and hide all form instruction and caption elements
-    st.markdown(
-        """
-        <style>
-        /* Hide the 'Press Enter to submit form' text explicitly */
-        [data-testid="stWidgetInstructions"] {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0px !important;
-        }
-        /* Extra safety to ensure no paragraph instructions render inside the input container */
-        div[data-testid="stTextInput"] p {
-            display: none !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     
     with center_col:
         st.markdown("<h2 style='text-align: center;'>🔒 Secure Access</h2>", unsafe_allow_html=True)
         
         with st.form(key='login_form', clear_on_submit=False):
-            password = st.text_input('Enter password', type='password', label_visibility='collapsed')
+            # Using an empty string label with collapsed visibility natively forces 
+            # Streamlit to drop the "Press Enter to submit form" helper text.
+            password = st.text_input(
+                label="", 
+                type='password', 
+                label_visibility='collapsed'
+            )
             
             btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
             with btn_col:
