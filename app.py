@@ -16,19 +16,6 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # Inject minimal custom CSS to increase the password input box height slightly
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stTextInput"] input {
-            height: 50px !important;       /* Increases height slightly */
-
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
     # Create 3 columns: Left padding (3.5 parts), Center content (3 parts), Right padding (3.5 parts)
     # This keeps the form exactly 30% width and perfectly centered on a wide layout
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
@@ -52,6 +39,7 @@ if not st.session_state['authenticated']:
             else:
                 st.error('Incorrect password.')
     st.stop()
+
 
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data
