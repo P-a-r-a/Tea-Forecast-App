@@ -81,9 +81,6 @@ if selected_year <= 2025:
             f'**{selected_buyer}** had no activity related to '
             f'**{selected_grade}** in **{selected_year}**.'
         )
-        st.info(
-            'Try selecting a different year or tea grade from the sidebar to view active records.'
-        )
         st.stop()
 
     # Merge onto 12-month scaffold
