@@ -315,31 +315,48 @@ else:
 
     st.divider()
 
-    # ── Build forecast_table first ────────────────────────────────────────────
-    def likelihood(p):
+    # ── Build Core Data Structures ────────────────────────────────────────────
+    def likelihood_with_emoji(p):
         if p >= 0.5:   return '🟢 High'
         elif p >= 0.3: return '🟡 Medium'
         else:          return '🔴 Low'
 
-    forecast_table = fcst_plot[[
+    def likelihood_clean(p):
+        if p >= 0.5:   return 'High'
+        elif p >= 0.3: return 'Medium'
+        else:          return 'Low'
+
+    # Extract base dataframe
+    base_fcst_table = fcst_plot[[
         'month_label', 'avg_buy_probability',
         'expected_qty', 'probability_wtd_qty'
     ]].copy()
 
-    forecast_table['Likelihood'] = (
-        forecast_table['avg_buy_probability'].apply(likelihood)
-    )
-    forecast_table['avg_buy_probability'] = (
-        forecast_table['avg_buy_probability'] * 100
-    ).round(1).astype(str) + '%'
-    forecast_table['expected_qty']        = (
-        forecast_table['expected_qty'].round(1)
-    )
-    forecast_table['probability_wtd_qty'] = (
-        forecast_table['probability_wtd_qty'].round(1)
-    )
+    # Apply common numeric layout configurations
+    base_fcst_table['expected_qty']        = base_fcst_table['expected_qty'].round(1)
+    base_fcst_table['probability_wtd_qty'] = base_fcst_table['probability_wtd_qty'].round(1)
 
-    forecast_table = forecast_table.rename(columns={
+    # 1. GENERATE APP INTERFACE DATAFRAME (WITH EMOJIS)
+    forecast_display = base_fcst_table.copy()
+    forecast_display['Likelihood'] = forecast_display['avg_buy_probability'].apply(likelihood_with_emoji)
+    forecast_display['avg_buy_probability'] = (forecast_display['avg_buy_probability'] * 100).round(1).astype(str) + '%'
+    
+    forecast_display = forecast_display.rename(columns={
+        'month_label':          'Month',
+        'avg_buy_probability':  'Buy probability',
+        'expected_qty':         'Predicted qty (bags)',
+        'probability_wtd_qty':  'Weighted qty (bags)',
+    })[[
+        'Month', 'Buy probability', 'Likelihood',
+        'Predicted qty (bags)', 'Weighted qty (bags)'
+    ]]
+
+    # 2. GENERATE CLEAN DOWNLOAD DATAFRAME (WITHOUT EMOJIS)
+    forecast_download = base_fcst_table.copy()
+    forecast_download['Likelihood'] = forecast_download['avg_buy_probability'].apply(likelihood_clean)
+    forecast_download['avg_buy_probability'] = (forecast_download['avg_buy_probability'] * 100).round(1).astype(str) + '%'
+    
+    forecast_download = forecast_download.rename(columns={
         'month_label':          'Month',
         'avg_buy_probability':  'Buy probability',
         'expected_qty':         'Predicted qty (bags)',
@@ -357,11 +374,11 @@ else:
         value=False
     )
 
-    display_table = forecast_table.copy()
+    display_table = forecast_display.copy()
 
     if show_above_50:
         mask = fcst_plot['avg_buy_probability'] >= 0.5
-        display_table = forecast_table[mask.values].reset_index(drop=True)
+        display_table = forecast_display[mask.values].reset_index(drop=True)
 
         if display_table.empty:
             st.info(
@@ -376,10 +393,9 @@ else:
 
     st.download_button(
         label='⬇ Download forecast as CSV',
-        # Adding '\ufeff' injects the hidden UTF-8 BOM signature
-        data='\ufeff' + forecast_table.to_csv(index=False),
+        data=forecast_download.to_csv(index=False),  # Clean download without emojis
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
-        mime='text/csv; charset=utf-8',  # Explicitly state the character set
+        mime='text/csv',
         key='download_forecast'
     )
 
@@ -402,23 +418,19 @@ else:
             f'**{selected_buyer}** · **{selected_grade}**.'
         )
     else:
-        hist_display = hist_all[
-            ['year', 'month', 'Qty', 'Average', 'purchased']
-        ].copy()
+        hist_base = hist_all[['year', 'month', 'Qty', 'Average', 'purchased']].copy()
 
-        hist_display['Month'] = pd.to_datetime(
-            hist_display[['year', 'month']].assign(day=1)
+        hist_base['Month'] = pd.to_datetime(
+            hist_base[['year', 'month']].assign(day=1)
         ).dt.strftime('%b %Y')
 
-        hist_display['purchased'] = hist_display['purchased'].fillna(0).astype(int)
-        hist_display['Purchased'] = hist_display['purchased'].map({
-            1: '✅ Yes', 
-            0: '❌ No'
-        })
+        hist_base['purchased'] = hist_base['purchased'].fillna(0).astype(int)
+        hist_base['Qty']     = hist_base['Qty'].astype(int)
+        hist_base['Average'] = hist_base['Average'].round(2)
 
-        hist_display['Qty']     = hist_display['Qty'].astype(int)
-        hist_display['Average'] = hist_display['Average'].round(2)
-
+        # 1. App Display layout configuration (WITH EMOJIS)
+        hist_display = hist_base.copy()
+        hist_display['Purchased'] = hist_base['purchased'].map({1: '✅ Yes', 0: '❌ No'})
         hist_display = hist_display[[
             'Month', 'Purchased', 'Qty', 'Average'
         ]].rename(columns={
@@ -428,11 +440,20 @@ else:
 
         st.dataframe(hist_display, use_container_width=True, hide_index=True)
 
+        # 2. Clean Download layout configuration (WITHOUT EMOJIS)
+        hist_download = hist_base.copy()
+        hist_download['Purchased'] = hist_base['purchased'].map({1: 'Yes', 0: 'No'})
+        hist_download = hist_download[[
+            'Month', 'Purchased', 'Qty', 'Average'
+        ]].rename(columns={
+            'Qty':     'Qty purchased (bags)',
+            'Average': 'Avg price'
+        })
+
         st.download_button(
             label='⬇ Download historical data as CSV',
-            # Adding '\ufeff' injects the hidden UTF-8 BOM signature
-            data='\ufeff' + hist_display.to_csv(index=False),
+            data=hist_download.to_csv(index=False),  # Clean download without emojis
             file_name=f'{selected_buyer}_{selected_grade}_history.csv',
-            mime='text/csv; charset=utf-8',  # Explicitly state the character set
+            mime='text/csv',
             key='download_history'
         )
