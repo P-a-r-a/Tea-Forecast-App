@@ -16,30 +16,32 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
+    # Center the form layout (35% left spacing, 30% center box, 35% right spacing)
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     
     with center_col:
         st.markdown("<h2 style='text-align: center;'>🔒 Secure Access</h2>", unsafe_allow_html=True)
         
-        with st.form(key='login_form', clear_on_submit=False):
-            # Using an empty string label with collapsed visibility natively forces 
-            # Streamlit to drop the "Press Enter to submit form" helper text.
-            password = st.text_input(
-                label="", 
-                type='password', 
-                label_visibility='collapsed'
-            )
-            
-            btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
-            with btn_col:
-                submit_button = st.form_submit_button(label='Login', use_container_width=True)
+        # Removing st.form completely eliminates the "Press Enter to submit form" text
+        password = st.text_input(
+            'Enter password', 
+            type='password', 
+            label_visibility='collapsed'
+        )
+        
+        # Nested columns to cleanly center-align the standard button
+        btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
+        with btn_col:
+            login_clicked = st.button('Login', use_container_width=True)
                 
-        if submit_button:
+        # Validate credentials when the button is clicked
+        if login_clicked:
             if password == st.secrets['APP_PASSWORD']:
                 st.session_state['authenticated'] = True
-                st.rerun()  
+                st.rerun()  # Instantly redraws the page to clear the login screen
             else:
                 st.error('Incorrect password.')
+                
     st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
@@ -115,7 +117,7 @@ bar2 = alt.Chart(grp).mark_bar(size=15).encode(
     color=alt.value('coral'),
     tooltip=[
         alt.Tooltip('month_label:N', title='Month'),
-        alt.Tooltip('expected_qty:Q', title='Expected Qty (bags)', format=',.0f')
+        alt.Tooltip('expected_qty:Q', title='Expected Qty (bags)', format=',.1f')
     ]
 )
 
