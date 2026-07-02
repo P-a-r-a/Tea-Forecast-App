@@ -376,9 +376,10 @@ else:
 
     st.download_button(
         label='⬇ Download forecast as CSV',
-        data=display_table.to_csv(index=False),
+        # Adding '\ufeff' injects the hidden UTF-8 BOM signature
+        data='\ufeff' + forecast_table.to_csv(index=False),
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
-        mime='text/csv',
+        mime='text/csv; charset=utf-8',  # Explicitly state the character set
         key='download_forecast'
     )
 
@@ -429,8 +430,9 @@ else:
 
         st.download_button(
             label='⬇ Download historical data as CSV',
-            data=hist_display.to_csv(index=False),
+            # Adding '\ufeff' injects the hidden UTF-8 BOM signature
+            data='\ufeff' + hist_display.to_csv(index=False),
             file_name=f'{selected_buyer}_{selected_grade}_history.csv',
-            mime='text/csv',
+            mime='text/csv; charset=utf-8',  # Explicitly state the character set
             key='download_history'
         )
