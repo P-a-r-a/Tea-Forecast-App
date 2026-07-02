@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title='Tea Buyer Forecast',
-    page_icon='🍵',
+    page_icon='☕',
     layout='wide'
 )
 
@@ -54,7 +54,7 @@ ALL_MONTHS  = pd.DataFrame({
 })
 
 # ── Main UI ───────────────────────────────────────────────────────────────────
-st.title('🍵 Specialty Tea Buyer Forecast')
+st.title('☕ Specialty Tea Buyer Forecast')
 st.write('Select a buyer, year, and grade to see their monthly forecast.')
 
 # ── Three dropdowns: Buyer | Year | Grade ─────────────────────────────────────
@@ -107,7 +107,7 @@ if selected_year <= 2025:
 
    # ── Dual bar chart (Plotly) ───────────────────────────────────────────────
     st.subheader(
-        f'📊 Monthly sales — {selected_buyer} · {selected_grade} · {selected_year}'
+        f'🗓️ Monthly sales — {selected_buyer} · {selected_grade} · {selected_year}'
     )
 
     fig_hist = go.Figure()
@@ -173,7 +173,7 @@ if selected_year <= 2025:
     st.plotly_chart(fig_hist, use_container_width=True)
 
     # ── Single table — mirrors chart data ─────────────────────────────────────
-    st.subheader('📋 Monthly sales table')
+    st.subheader('✍️ Monthly sales table')
 
     sales_table = hist_plot[['month_label', 'Qty', 'Average']].copy()
     sales_table['Qty']     = sales_table['Qty'].astype(int)
@@ -187,7 +187,7 @@ if selected_year <= 2025:
     st.dataframe(sales_table, use_container_width=True, hide_index=True)
 
     st.download_button(
-        label='⬇ Download as CSV',
+        label='⬇️ Download as CSV',
         data=sales_table.to_csv(index=False),
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_sales.csv',
         mime='text/csv',
@@ -224,7 +224,7 @@ else:
 
     # ── Triple bar chart (Plotly) ─────────────────────────────────────────────
     st.subheader(
-        f'📊 Monthly forecast — {selected_buyer} · {selected_grade} · {selected_year}'
+        f'🗓️ Monthly forecast — {selected_buyer} · {selected_grade} · {selected_year}'
     )
 
     fig = go.Figure()
@@ -392,7 +392,7 @@ else:
     st.dataframe(display_table, use_container_width=True, hide_index=True)
 
     st.download_button(
-        label='⬇ Download forecast as CSV',
+        label='⬇️ Download forecast as CSV',
         data=forecast_download.to_csv(index=False),  # Clean download without emojis
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
         mime='text/csv',
@@ -400,7 +400,7 @@ else:
     )
 
     # ── Historical reference table ────────────────────────────────────────────
-    st.subheader('📂 Historical purchase data')
+    st.subheader('🕰️ Historical purchase data')
     st.write('Actual purchase records used to train the model for this buyer and grade.')
 
     hist_all = (
@@ -451,7 +451,7 @@ else:
         })
 
         st.download_button(
-            label='⬇ Download historical data as CSV',
+            label='⬇️ Download historical data as CSV',
             data=hist_download.to_csv(index=False),  # Clean download without emojis
             file_name=f'{selected_buyer}_{selected_grade}_history.csv',
             mime='text/csv',
