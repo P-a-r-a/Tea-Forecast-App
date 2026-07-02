@@ -84,39 +84,40 @@ if grp.empty:
 st.divider()
 
 # ═════════════════════════════════════════════════════════════════════════════
-# OUTPUT 1 — Interactive Altair Dual Axis Bar Chart
+# OUTPUT 1 — Interactive Altair Grouped Dual-Axis Bar Chart
 # ═════════════════════════════════════════════════════════════════════════════
 st.subheader(f'📊 Monthly forecast — {selected_buyer} · {selected_grade}')
 
-# Base configuration shared across both bars
-base = alt.Chart(grp).encode(
-    x=alt.X('month_label:N', title='Month', sort=None)
-)
-
-# Left Side Chart: Buy Probability
-bar1 = base.mark_bar(color='steelblue', opacity=0.8).encode(
+# 1. Left Side Chart: Buy Probability
+bar1 = alt.Chart(grp).mark_bar(size=15).encode(
+    x=alt.X('month_label:N', title='Month', sort=None),
+    xOffset=alt.value(-8),  # Shift this bar slightly to the left
     y=alt.Y('avg_buy_probability:Q', 
             title='Buy probability', 
             axis=alt.Axis(format='%', titleColor='steelblue', labelColor='steelblue'),
             scale=alt.Scale(domain=[0, 1])),
+    color=alt.value('steelblue'),
     tooltip=[
         alt.Tooltip('month_label:N', title='Month'),
         alt.Tooltip('avg_buy_probability:Q', title='Buy Probability', format='.1%')
     ]
 )
 
-# Right Side Chart: Expected Quantity
-bar2 = base.mark_bar(color='coral', opacity=0.8).encode(
+# 2. Right Side Chart: Expected Quantity
+bar2 = alt.Chart(grp).mark_bar(size=15).encode(
+    x=alt.X('month_label:N', title='Month', sort=None),
+    xOffset=alt.value(8),   # Shift this bar slightly to the right
     y=alt.Y('expected_qty:Q', 
             title='Expected quantity (bags)', 
             axis=alt.Axis(titleColor='coral', labelColor='coral')),
+    color=alt.value('coral'),
     tooltip=[
         alt.Tooltip('month_label:N', title='Month'),
         alt.Tooltip('expected_qty:Q', title='Expected Qty (bags)', format=',.0f')
     ]
 )
 
-# Layer them together using an independent scale for the second y-axis
+# 3. Layer them together with independent Y-scales
 interactive_chart = alt.layer(bar1, bar2).resolve_scale(
     y='independent'
 ).properties(
