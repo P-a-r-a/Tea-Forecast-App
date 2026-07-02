@@ -141,6 +141,27 @@ if selected_year <= 2025:
     fig_hist.update_layout(
         barmode='group',
         height=450,
+        xaxis=dict(
+            title='Month',
+            categoryorder='array',
+            categoryarray=MONTH_ORDER
+        ),
+        yaxis=dict(
+            title='Qty sold (bags)',
+            titlefont=dict(color='steelblue'),
+            tickfont=dict(color='steelblue'),
+            showgrid=False,
+            rangemode='tozero'
+        ),
+        yaxis2=dict(
+            title='Avg price',
+            titlefont=dict(color='coral'),
+            tickfont=dict(color='coral'),
+            overlaying='y',
+            side='right',
+            showgrid=False,
+            rangemode='tozero'
+        ),
         legend=dict(
             orientation='h',
             yanchor='bottom',
@@ -149,31 +170,6 @@ if selected_year <= 2025:
             x=1
         ),
         margin=dict(t=80, b=40, l=60, r=60)
-    )
-
-    fig_hist.update_xaxes(
-        title_text='Month',
-        categoryorder='array',
-        categoryarray=MONTH_ORDER
-    )
-
-    fig_hist.update_yaxes(
-        title_text='Qty sold (bags)',
-        titlefont=dict(color='steelblue'),
-        tickfont=dict(color='steelblue'),
-        showgrid=False,
-        rangemode='tozero'
-    )
-
-    fig_hist.update_yaxes(
-        title_text='Avg price',
-        titlefont=dict(color='coral'),
-        tickfont=dict(color='coral'),
-        overlaying='y',
-        side='right',
-        showgrid=False,
-        rangemode='tozero',
-        secondary_y=True
     )
 
     st.plotly_chart(fig_hist, use_container_width=True)
