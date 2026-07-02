@@ -317,8 +317,8 @@ else:
 
     # ── Build forecast_table first ────────────────────────────────────────────
     def likelihood(p):
-        if p >= 0.7:   return '🟢 High'
-        elif p >= 0.4: return '🟡 Medium'
+        if p >= 0.5:   return '🟢 High'
+        elif p >= 0.3: return '🟡 Medium'
         else:          return '🔴 Low'
 
     forecast_table = fcst_plot[[
