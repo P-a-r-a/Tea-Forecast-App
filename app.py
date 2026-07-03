@@ -11,7 +11,7 @@ import urllib.request
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title='Tea Buyer Forecast',
-    page_icon='☕',
+    page_icon='☕︎',
     layout='wide'
 )
 
@@ -135,7 +135,7 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
     return bytes(pdf.output())
 
 # ── Main UI ───────────────────────────────────────────────────────────────────
-st.title('☕ Specialty Tea Buyer Forecast')
+st.title('☕︎ Specialty Tea Buyer Forecast')
 st.write('Select a buyer, year, and grade to see their monthly forecast.')
 
 # ── Sidebar: Buyer | Year | Grade ────────────────────────────────────────────
@@ -161,16 +161,16 @@ with st.sidebar:
 
     grades_with_data = source['Grade'].unique().tolist()
 
-    # Append "✗ no data" marker to inactive grades so user can tell at a glance
+    # Append "- no data" marker to inactive grades so user can tell at a glance
     grade_display_list = [
-        g if g in grades_with_data else f'{g}  ✗ no data'
+        g if g in grades_with_data else f'{g}  - no data'
         for g in ALL_GRADES
     ]
 
     selected_grade_display = st.selectbox('Select grade', grade_display_list)
 
     # Strip marker to get the clean grade name used in all filters
-    selected_grade = selected_grade_display.replace('  ✗ no data', '').strip()
+    selected_grade = selected_grade_display.replace('  - no data', '').strip()
 
 # ═════════════════════════════════════════════════════════════════════════════
 # HISTORICAL YEARS (2023 – 2025)
