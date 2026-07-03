@@ -32,19 +32,19 @@ st.markdown("""
 </div>
 
 <style>
-    /* Maximize z-index to 9999999 so it renders on top of the login forms instantly */
+    /* 1. START WITH A SOLID BACKGROUND (No transparency here) */
     #initial-page-overlay {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        background: rgba(0, 0, 0, 0.5) !important; /* Semi-transparent dark mask */
+        background: #111111 !important; /* Change to #ffffff if you want a white screen */
         z-index: 9999999 !important; 
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        animation: smoothFadeOut 3.5s forwards !important;
+        animation: smoothFadeOut 3.5s forwards !important; /* This handles the fade-out */
         pointer-events: none !important;
     }
 
@@ -131,7 +131,7 @@ st.markdown("""
         left: 50%;
         transform: translateX(-50%);
         font-size: 12px;
-        color: #ffffff; 
+        color: #ffffff; /* Change to #333333 if using a white background */
         opacity: 0.8;
     }
 
@@ -160,10 +160,10 @@ st.markdown("""
         50% { background: #fed197d5; }
     }
 
+    /* 2. THE BACKGROUND TRANSFORMS TO TRANSPARENT ONLY AT THE VERY END */
     @keyframes smoothFadeOut {
         0% { opacity: 1; visibility: visible; }
-        75% { opacity: 1; visibility: visible; }
-        99% { opacity: 0; visibility: visible; }
+        80% { opacity: 1; visibility: visible; }
         100% { opacity: 0; visibility: hidden; display: none; }
     }
 </style>
