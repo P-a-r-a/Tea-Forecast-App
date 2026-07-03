@@ -22,11 +22,10 @@ st.markdown("""
     <div id="initial-loader" style="
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: #111; color: #fff; z-index: 99999;
-        display: flex !important; flex-direction: column !important; 
-        justify-content: center !important; align-items: center !important;
+        display: flex; flex-direction: column; 
+        justify-content: center; align-items: center;
         font-family: 'Helvetica Neue', sans-serif;
-        animation: fadeOut 1.2s forwards;
-        animation-delay: 2s;
+        animation: fadeOut 3.5s forwards;
         pointer-events: none;">
         
         <div class="cup">
@@ -35,7 +34,7 @@ st.markdown("""
             <div class="smoke two"></div>
             <div class="smoke three"></div>
         </div>
-        <div class="load">Loading...</div>
+        <div class="load">Loading Dashboard...</div>
     </div>
     
     <style>
@@ -47,7 +46,7 @@ st.markdown("""
             border: 1px solid #2e2e2e;
             border-radius: 3px 3px 10px 10px;
             z-index: 1;
-            animation: cupPulse 6s infinite ease-in-out;
+            animation: cupPulse 3s infinite ease-in-out;
         }
 
         .cup::before {
@@ -61,7 +60,7 @@ st.markdown("""
             border-top: none;
             border-radius: 50%;
             z-index: -1;
-            animation: cupPulse 6s infinite ease-in-out;
+            animation: cupPulse 3s infinite ease-in-out;
         }
 
         .cup::after {
@@ -74,7 +73,7 @@ st.markdown("""
             background: #da8920ca;
             border: 1px solid #2e2e2e;
             border-radius: 50%;
-            animation: coffeeGlow 6s infinite ease-in-out;
+            animation: coffeeGlow 3s infinite ease-in-out;
         }
 
         .cup-handle {
@@ -95,22 +94,16 @@ st.markdown("""
             left: 50%;
             width: 10px;
             height: 25px;
-            background: rgba(72, 67, 67, 0.501);
+            background: rgba(150, 150, 150, 0.4);
             border-radius: 50%;
             transform: translateX(-50%);
-            animation: rise 3s infinite ease-in-out;
-            filter: blur(8px);
+            animation: rise 2.5s infinite ease-in-out;
+            filter: blur(5px);
         }
 
-        .smoke.one {
-            animation-delay: 0s;
-        }
-        .smoke.two {
-            animation-delay: 0.8s;
-        }
-        .smoke.three {
-            animation-delay: 1.6s;
-        }
+        .smoke.one { animation-delay: 0s; }
+        .smoke.two { animation-delay: 0.6s; }
+        .smoke.three { animation-delay: 1.2s; }
 
         .load {
             margin-top: 25px;
@@ -121,36 +114,27 @@ st.markdown("""
         }
 
         @keyframes rise {
-            0% {
-                transform: translate(-50%, 0) scale(0.4);
-                opacity: 0;
-            }
-            30% {
-                opacity: 0.7;
-            }
-            60% {
-                opacity: 0.4;
-            }
-            100% {
-                transform: translate(-50%, -120px) scale(1);
-                opacity: 0;
-            }
+            0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+            40% { opacity: 0.6; }
+            100% { transform: translate(-50%, -70px) scale(1.1); opacity: 0; }
         }
 
+        /* Combined fade-out framework execution */
         @keyframes fadeOut {
             0% { opacity: 1; visibility: visible; }
+            70% { opacity: 1; visibility: visible; }
             99% { opacity: 0; visibility: visible; }
-            100% { opacity: 0; visibility: hidden; display: none; }
+            100% { opacity: 0; visibility: hidden; }
         }
 
         @keyframes cupPulse {
             0%, 100% { background-color: #5b4022cb; }
-            50% { background-color: #f5f5f5bd; }
+            50% { background-color: #7a5830cb; }
         }
 
         @keyframes coffeeGlow {
             0%, 100% { background: #da8920ca; }
-            50% { background: #fed197d5; }
+            50% { background: #fca83ecb; }
         }
     </style>
 """, unsafe_allow_html=True)
