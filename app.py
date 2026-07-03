@@ -34,28 +34,60 @@ st.markdown("""
 </div>
 </div>
 
+<!-- Automated Smooth Scroll Trigger Script -->
+<script>
+function initAutoscroll() {
+    const splash = document.getElementById('splash-screen-overlay');
+    const authSection = window.parent.document.getElementById('auth-section');
+    
+    if (!splash) return;
+
+    // Detect user scrolling attempts
+    const scrollContainer = window.parent.document.querySelector('[data-testid="stAppViewMain"]') || window.parent;
+    
+    let triggered = false;
+    const handleScroll = () => {
+        const currentScroll = scrollContainer.scrollTop || window.parent.pageYOffset;
+        if (currentScroll > 10 && !triggered) {
+            triggered = true;
+            const target = window.parent.document.getElementById('auth-section');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Remove listener after trigger to let user scroll back up freely if they want
+            scrollContainer.removeEventListener('scroll', handleScroll);
+        }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Mobile Touch/Swipe handling
+    let touchStart = 0;
+    window.parent.document.addEventListener('touchstart', e => {
+        touchStart = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.parent.document.addEventListener('touchend', e => {
+        let touchEnd = e.changedTouches[0].clientY;
+        if (touchStart - touchEnd > 30 && !triggered) { // Swiped up
+            triggered = true;
+            const target = window.parent.document.getElementById('auth-section');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }, { passive: true });
+}
+
+// Execute trigger checking inside the parent Streamlit DOM window layer
+setTimeout(initAutoscroll, 300);
+</script>
+
 <style>
-/* 1. Target the actual foundational main view container elements */
-section.stAppViewMain, 
-[data-testid="stAppViewMain"] {
-    scroll-snap-type: y mandatory !important;
-    overflow-y: auto !important;
-    scroll-behavior: smooth !important;
-}
-
-/* 2. Enforce structural layout properties onto Streamlit's inner generation layout */
-[data-testid="stAppViewBlockContainer"] > div[data-testid="stVerticalBlock"] > div {
-    scroll-snap-align: start !important;
-    scroll-snap-stop: always !important;
-}
-
-/* 3. Style Splash Screen to strictly dominate the full visible screen viewport */
 #splash-screen-overlay {
-    scroll-snap-align: start !important;
-    scroll-snap-stop: always !important;
     position: relative;
     width: 100%;
-    height: 95vh;
+    height: 92vh; /* Keeps it perfectly locked to almost full view height */
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -63,10 +95,9 @@ section.stAppViewMain,
     color: #ffffff;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     border-radius: 12px;
-    margin-bottom: 50px;
+    margin-bottom: 80px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-
 .splash-content {
     text-align: center;
     display: flex;
@@ -74,7 +105,6 @@ section.stAppViewMain,
     align-items: center;
     gap: 40px;
 }
-
 .splash-title {
     font-size: 2.5rem !important;
     font-weight: 300 !important;
@@ -82,13 +112,11 @@ section.stAppViewMain,
     color: #ffffff !important;
     margin: 0 !important;
 }
-
 .loader {
     width: 60px;
     height: 50px;
     position: relative;
 }
-
 .cup {
     position: absolute;
     bottom: 10px;
@@ -100,7 +128,6 @@ section.stAppViewMain,
     border: 2px solid #ffffff;
     border-radius: 3px 3px 12px 12px;
 }
-
 .cup::before {
     content: "";
     position: absolute;
@@ -112,7 +139,6 @@ section.stAppViewMain,
     border-top: none;
     border-radius: 50%;
 }
-
 .cup::after {
     content: "";
     position: absolute;
@@ -123,7 +149,6 @@ section.stAppViewMain,
     background: #da8920ca;
     border-radius: 50%;
 }
-
 .cup-handle {
     position: absolute;
     top: 6px;
@@ -134,27 +159,22 @@ section.stAppViewMain,
     border-left: none;
     border-radius: 0 10px 10px 0;
 }
-
 .scroll-prompt {
     font-size: 1rem;
     letter-spacing: 1px;
     opacity: 0.8;
     animation: bounce 2s infinite;
 }
-
 .scroll-prompt p {
     margin: 0 !important;
 }
-
 .mobile-text { display: none; }
 .desktop-text { display: block; }
-
 @media (max-width: 768px) {
     .splash-title { font-size: 1.8rem !important; }
     .mobile-text { display: block; }
     .desktop-text { display: none; }
 }
-
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
     40% { transform: translateY(-8px); }
