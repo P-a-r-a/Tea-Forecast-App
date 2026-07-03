@@ -7,6 +7,7 @@ from fpdf import FPDF
 import tempfile
 import os
 import urllib.request
+import time
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -15,6 +16,31 @@ st.set_page_config(
     layout='wide',
     initial_sidebar_state='expanded'
 )
+
+# ── Initial loading screen overlay ─────────────────────────────────────────────────────
+st.markdown("""
+    <div id="initial-loader" style="
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #111; color: #fff; z-index: 99999;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        font-family: 'Helvetica Neue', sans-serif; transition: opacity 0.5s ease;">
+        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #4CAF50; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
+        <h3 style="margin-top: 20px; font-weight: 300; letter-spacing: 2px;">♨️ INITIALIZING TEA FORECAST...</h3>
+    </div>
+    <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script>
+        // Automatically fade out and remove the loader after page loads
+        setTimeout(() => {
+            const loader = document.getElementById('initial-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 500);
+            }
+        }, 800);
+    </script>
+""", unsafe_allow_html=True)
 
 # ── Password gate ─────────────────────────────────────────────────────────────
 if 'authenticated' not in st.session_state:
@@ -35,6 +61,23 @@ if not st.session_state['authenticated']:
         if submit_button:
             if password == st.secrets['APP_PASSWORD']:
                 st.session_state['authenticated'] = True
+                
+                # Display a full-screen overlay with a decryption animation
+                st.markdown("""
+                    <div style="
+                        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                        background: radial-gradient(circle, #1a2a6c, #b21f1f, #fdbb2d); z-index: 999999;
+                        display: flex; flex-direction: column; justify-content: center; align-items: center;
+                        color: white; font-family: sans-serif;">
+                        <div style="font-size: 50px; margin-bottom: 20px; animation: pulse 1.5s infinite;">🔒</div>
+                        <h2>Decrypting & Accessing Secure Database...</h2>
+                    </div>
+                    <style>
+                        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+                    </style>
+                """, unsafe_allow_html=True)
+                time.sleep(1.5)
+                
                 st.rerun()
             else:
                 st.error('Incorrect password.')
@@ -145,6 +188,28 @@ with st.sidebar:
 
     buyer_list     = sorted(forecast['Buyer_Name'].unique().tolist())
     selected_buyer = st.selectbox('Select buyer', buyer_list)
+    if 'previous_buyer' not in st.session_state:
+        st.session_state['previous_buyer'] = selected_buyer
+
+    if st.session_state['previous_buyer'] != selected_buyer:
+        st.markdown(f"""
+            <div style="
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(255, 255, 255, 0.95); z-index: 99999;
+                display: flex; flex-direction: column; justify-content: center; align-items: center;
+                font-family: Arial, sans-serif;">
+                <div style="width: 60px; height: 60px; border: 5px solid #ccc; border-bottom-color: #ff7f50; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <h2 style="color: #333; margin-top: 20px;">Fetching metrics for <b>{selected_buyer}</b>...</h2>
+                <p style="color: #777;">Recalculating forecast models and charting records</p>
+            </div>
+            <style>
+                @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
+            </style>
+        """, unsafe_allow_html=True)
+        st.session_state['previous_buyer'] = selected_buyer
+        time.sleep(1.2) # Yields execution to let browser show CSS before layout update
+        st.rerun()
+
     selected_year  = st.selectbox('Select year', list(range(2023, 2031)))
 
     # Determine which grades have data for this buyer + year
@@ -238,7 +303,7 @@ if selected_year <= 2025:
     fig_hist = go.Figure()
 
     fig_hist.add_trace(go.Bar(
-        name='Qty sold (bags)',
+        name='Quantity Sold (bags)',
         x=hist_plot['month_label'],
         y=hist_plot['Qty'],
         marker_color='steelblue',
@@ -248,7 +313,7 @@ if selected_year <= 2025:
     ))
 
     fig_hist.add_trace(go.Bar(
-        name='Avg price',
+        name='Average Price',
         x=hist_plot['month_label'],
         y=hist_plot['Average'],
         marker_color='coral',
@@ -377,7 +442,7 @@ else:
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
-        name='Buy probability',
+        name='Probability of Purchase',
         x=fcst_plot['month_label'],
         y=fcst_plot['avg_buy_probability'],
         marker_color='steelblue',
@@ -387,7 +452,7 @@ else:
     ))
 
     fig.add_trace(go.Bar(
-        name='Predicted qty (bags)',
+        name='Predicted Quantity (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['expected_qty'],
         marker_color='coral',
@@ -403,7 +468,7 @@ else:
     ))
 
     fig.add_trace(go.Bar(
-        name='Weighted qty (bags)',
+        name='Weighted Quantity (bags)',
         x=fcst_plot['month_label'],
         y=fcst_plot['probability_wtd_qty'],
         marker_color='seagreen',
@@ -486,11 +551,11 @@ else:
     ).round(1).astype(str) + '%'
     forecast_display = forecast_display.rename(columns={
         'month_label':          'Month',
-        'avg_buy_probability':  'Buy probability',
-        'expected_qty':         'Predicted qty (bags)',
-        'probability_wtd_qty':  'Weighted qty (bags)',
-    })[['Month', 'Buy probability', 'Likelihood',
-        'Predicted qty (bags)', 'Weighted qty (bags)']]
+        'avg_buy_probability':  'Probability of Purchase',
+        'expected_qty':         'Predicted Quantity (bags)',
+        'probability_wtd_qty':  'Weighted Quantity (bags)',
+    })[['Month', 'Probability of Purchase', 'Likelihood',
+        'Predicted Quantity (bags)', 'Weighted Quantity (bags)']]
 
     # Download version — no emojis for CSV and PDF
     forecast_download = base.copy()
@@ -502,11 +567,11 @@ else:
     ).round(1).astype(str) + '%'
     forecast_download = forecast_download.rename(columns={
         'month_label':          'Month',
-        'avg_buy_probability':  'Buy probability',
-        'expected_qty':         'Predicted qty (bags)',
-        'probability_wtd_qty':  'Weighted qty (bags)',
-    })[['Month', 'Buy probability', 'Likelihood',
-        'Predicted qty (bags)', 'Weighted qty (bags)']]
+        'avg_buy_probability':  'Probability of Purchase',
+        'expected_qty':         'Predicted Quantity (bags)',
+        'probability_wtd_qty':  'Weighted Quantity (bags)',
+    })[['Month', 'Probability of Purchase', 'Likelihood',
+        'Predicted Quantity (bags)', 'Weighted Quantity (bags)']]
 
     # ── Filter toggle — affects forecast table only ───────────────────────────
     show_above_50 = st.toggle(
@@ -578,8 +643,8 @@ else:
         hist_display = hist_display[
             ['Month', 'Purchased', 'Qty', 'Average']
         ].rename(columns={
-            'Qty':     'Qty purchased (bags)',
-            'Average': 'Avg price'
+            'Qty':     'Quantity Purchased (bags)',
+            'Average': 'Average Price'
         })
 
         # Download version — no emojis
@@ -590,8 +655,8 @@ else:
         hist_download = hist_download[
             ['Month', 'Purchased', 'Qty', 'Average']
         ].rename(columns={
-            'Qty':     'Qty purchased (bags)',
-            'Average': 'Avg price'
+            'Qty':     'Quantity Purchased (bags)',
+            'Average': 'Average Price'
         })
 
         st.dataframe(hist_display, use_container_width=True, hide_index=True)
