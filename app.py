@@ -39,7 +39,6 @@ st.markdown("""
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: #111111;
         z-index: 99999;
         display: flex !important;
         justify-content: center !important;
@@ -50,8 +49,8 @@ st.markdown("""
 
     /* Your exact custom Loader CSS */
     .loader {
-        width: 100px;
-        height: 100px;
+        width: 200px;
+        height: 200px;
         position: relative;
         animation: shake 3s infinite ease-in-out;
     }
