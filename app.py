@@ -599,7 +599,7 @@ else:
         st.markdown('<div style="margin-top:28px;"></div>',
                     unsafe_allow_html=True)
         st.download_button(
-            label='📄 Download report',
+            label='⬇️ Download report',
             data=pdf_bytes_fcst,
             file_name=(
                 f'{selected_buyer}_{selected_grade}'
