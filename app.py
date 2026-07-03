@@ -5,9 +5,8 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from fpdf import FPDF
 import tempfile
-import urllib.request
 import os
-import io
+import urllib.request
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -58,26 +57,34 @@ ALL_MONTHS  = pd.DataFrame({
     'month_label': MONTH_ORDER
 })
 
-# ── PDF generation helper ─────────────────────────────────────────────────────
+# ── Font download helper ──────────────────────────────────────────────────────
+@st.cache_data
 def get_fonts():
-    """Download Noto Sans fonts once per session and cache to /tmp."""
+    """Download Noto Sans fonts once per session, cache to /tmp."""
     regular_path = '/tmp/NotoSans-Regular.ttf'
     bold_path    = '/tmp/NotoSans-Bold.ttf'
-
     if not os.path.exists(regular_path):
         urllib.request.urlretrieve(
-            'https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf',
+            'https://github.com/googlefonts/noto-fonts/raw/main/'
+            'hinted/ttf/NotoSans/NotoSans-Regular.ttf',
             regular_path
         )
     if not os.path.exists(bold_path):
         urllib.request.urlretrieve(
-            'https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Bold.ttf',
+            'https://github.com/googlefonts/noto-fonts/raw/main/'
+            'hinted/ttf/NotoSans/NotoSans-Bold.ttf',
             bold_path
         )
     return regular_path, bold_path
 
-
+# ── PDF builder ───────────────────────────────────────────────────────────────
 def build_pdf(title, chart_fig, tables: dict) -> bytes:
+    """
+    Renders a Plotly figure to PNG then builds a PDF containing
+    the chart followed by each table in `tables`.
+    tables = {'Table title': dataframe, ...}
+    Returns PDF as bytes.
+    """
     font_regular, font_bold = get_fonts()
 
     pdf = FPDF()
@@ -95,7 +102,6 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
     # Chart image
     with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
         tmp_path = tmp.name
-
     pio.write_image(chart_fig, tmp_path, format='png', width=1100, height=450)
     pdf.image(tmp_path, x=10, w=190)
     os.unlink(tmp_path)
@@ -110,14 +116,14 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
         col_count = len(df.columns)
         col_width = 190 / col_count
 
-        # Header
+        # Header row
         pdf.set_font('Noto', 'B', 9)
         pdf.set_fill_color(220, 230, 241)
         for col in df.columns:
             pdf.cell(col_width, 7, str(col), border=1, fill=True)
         pdf.ln()
 
-        # Rows
+        # Data rows
         pdf.set_font('Noto', '', 9)
         for _, row in df.iterrows():
             for val in row:
@@ -132,7 +138,7 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
 st.title('☕ Specialty Tea Buyer Forecast')
 st.write('Select a buyer, year, and grade to see their monthly forecast.')
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# ── Sidebar: Buyer | Year | Grade ────────────────────────────────────────────
 with st.sidebar:
     st.header('🔍 Filter Options')
 
@@ -140,8 +146,7 @@ with st.sidebar:
     selected_buyer = st.selectbox('Select buyer', buyer_list)
     selected_year  = st.selectbox('Select year', list(range(2023, 2031)))
 
-    # ── Grade dropdown with inactive markers ──────────────────────────────────
-    # Check which grades have data for this buyer + year combination
+    # Determine which grades have data for this buyer + year
     if selected_year <= 2025:
         source = historical[
             (historical['Buyer_Name'] == selected_buyer) &
@@ -156,16 +161,16 @@ with st.sidebar:
 
     grades_with_data = source['Grade'].unique().tolist()
 
-    # Build display list — append " (no data)" to inactive grades
+    # Append "✗ no data" marker to inactive grades so user can tell at a glance
     grade_display_list = [
-        g if g in grades_with_data else f'{g}  - no data'
+        g if g in grades_with_data else f'{g}  ✗ no data'
         for g in ALL_GRADES
     ]
 
     selected_grade_display = st.selectbox('Select grade', grade_display_list)
 
-    # Strip the marker to get the clean grade name for filtering
-    selected_grade = selected_grade_display.replace('  - no data', '').strip()
+    # Strip marker to get the clean grade name used in all filters
+    selected_grade = selected_grade_display.replace('  ✗ no data', '').strip()
 
 # ═════════════════════════════════════════════════════════════════════════════
 # HISTORICAL YEARS (2023 – 2025)
@@ -192,21 +197,24 @@ if selected_year <= 2025:
     )
     hist_plot['Qty']       = hist_plot['Qty'].fillna(0).astype(float)
     hist_plot['purchased'] = hist_plot['purchased'].fillna(0).astype(int)
-    hist_plot['Average']   = np.where(
+
+    # Average price only on purchased months — 0 otherwise
+    hist_plot['Average'] = np.where(
         hist_plot['purchased'] == 1,
         hist_plot['Average'].fillna(0),
         0.0
     )
 
-    # ── Chart ─────────────────────────────────────────────────────────────────
+    # ── Title row with PDF button placeholder ─────────────────────────────────
     report_title = (
         f'Monthly Sales — {selected_buyer} · {selected_grade} · {selected_year}'
     )
-
-    title_col, btn_col = st.columns([6, 1])
+    title_col, pdf_btn_col = st.columns([5, 1])
     with title_col:
         st.subheader(f'🗓️ {report_title}')
+    # pdf_btn_col is filled after chart and table are built below
 
+    # ── Dual bar chart ────────────────────────────────────────────────────────
     fig_hist = go.Figure()
 
     fig_hist.add_trace(go.Bar(
@@ -254,15 +262,18 @@ if selected_year <= 2025:
             rangemode='tozero'
         ),
         legend=dict(
-            orientation='h', yanchor='bottom',
-            y=1.02, xanchor='right', x=1
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
         ),
         margin=dict(t=80, b=40, l=60, r=60)
     )
 
     st.plotly_chart(fig_hist, use_container_width=True)
 
-    # ── Table ─────────────────────────────────────────────────────────────────
+    # ── Sales table ───────────────────────────────────────────────────────────
     st.subheader('✍️ Monthly sales table')
 
     sales_table = hist_plot[['month_label', 'Qty', 'Average']].copy()
@@ -276,28 +287,31 @@ if selected_year <= 2025:
 
     st.dataframe(sales_table, use_container_width=True, hide_index=True)
 
-    dl_csv, dl_pdf = st.columns([1, 1])
+    st.download_button(
+        label='⬇️ Download table as CSV',
+        data=sales_table.to_csv(index=False),
+        file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_sales.csv',
+        mime='text/csv',
+        key='download_sales'
+    )
 
-    with dl_csv:
-        st.download_button(
-            label='⬇️ Download table as CSV',
-            data=sales_table.to_csv(index=False),
-            file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_sales.csv',
-            mime='text/csv',
-            key='download_sales'
+    # ── PDF report — placed in the title row column ───────────────────────────
+    with st.spinner('Preparing PDF report...'):
+        pdf_bytes_hist = build_pdf(
+            title=report_title,
+            chart_fig=fig_hist,
+            tables={'Monthly Sales Table': sales_table}
         )
-
-    with dl_pdf:
-        with st.spinner('Preparing PDF report...'):
-            pdf_bytes = build_pdf(
-                title=report_title,
-                chart_fig=fig_hist,
-                tables={'Monthly Sales Table': sales_table}
-            )
+    with pdf_btn_col:
+        st.markdown('<div style="margin-top:28px;"></div>',
+                    unsafe_allow_html=True)
         st.download_button(
-            label='⬇️ Download full report (PDF)',
-            data=pdf_bytes,
-            file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_report.pdf',
+            label='📄 Download report',
+            data=pdf_bytes_hist,
+            file_name=(
+                f'{selected_buyer}_{selected_grade}'
+                f'_{selected_year}_report.pdf'
+            ),
             mime='application/pdf',
             key='download_pdf_hist'
         )
@@ -330,13 +344,16 @@ else:
     fcst_plot['expected_qty']        = fcst_plot['expected_qty'].fillna(0)
     fcst_plot['probability_wtd_qty'] = fcst_plot['probability_wtd_qty'].fillna(0)
 
-    # ── Chart ─────────────────────────────────────────────────────────────────
+    # ── Title row with PDF button placeholder ─────────────────────────────────
     report_title = (
         f'Monthly Forecast — {selected_buyer} · {selected_grade} · {selected_year}'
     )
+    title_col, pdf_btn_col = st.columns([5, 1])
+    with title_col:
+        st.subheader(f'🗓️ {report_title}')
+    # pdf_btn_col is filled after all data is built below
 
-    st.subheader(f'🗓️ {report_title}')
-
+    # ── Triple bar chart ──────────────────────────────────────────────────────
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
@@ -407,15 +424,20 @@ else:
             rangemode='tozero'
         ),
         legend=dict(
-            orientation='h', yanchor='bottom',
-            y=1.02, xanchor='right', x=1
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
         ),
         margin=dict(t=80, b=40, l=60, r=60)
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
-    # ── Build tables ──────────────────────────────────────────────────────────
+    st.divider()
+
+    # ── Likelihood helpers ────────────────────────────────────────────────────
     def likelihood_emoji(p):
         if p >= 0.5:   return '🟢 High'
         elif p >= 0.3: return '🟡 Medium'
@@ -426,6 +448,7 @@ else:
         elif p >= 0.3: return 'Medium'
         else:          return 'Low'
 
+    # ── Build forecast tables ─────────────────────────────────────────────────
     base = fcst_plot[[
         'month_label', 'avg_buy_probability',
         'expected_qty', 'probability_wtd_qty'
@@ -433,7 +456,7 @@ else:
     base['expected_qty']        = base['expected_qty'].round(1)
     base['probability_wtd_qty'] = base['probability_wtd_qty'].round(1)
 
-    # Display version (with emojis)
+    # Display version — emojis for app
     forecast_display = base.copy()
     forecast_display['Likelihood'] = (
         forecast_display['avg_buy_probability'].apply(likelihood_emoji)
@@ -449,7 +472,7 @@ else:
     })[['Month', 'Buy probability', 'Likelihood',
         'Predicted qty (bags)', 'Weighted qty (bags)']]
 
-    # Download version (no emojis — for CSV and PDF)
+    # Download version — no emojis for CSV and PDF
     forecast_download = base.copy()
     forecast_download['Likelihood'] = (
         forecast_download['avg_buy_probability'].apply(likelihood_clean)
@@ -465,16 +488,14 @@ else:
     })[['Month', 'Buy probability', 'Likelihood',
         'Predicted qty (bags)', 'Weighted qty (bags)']]
 
-    # ── Filter toggle ─────────────────────────────────────────────────────────
-    st.divider()
-
+    # ── Filter toggle — affects forecast table only ───────────────────────────
     show_above_50 = st.toggle(
         'Show only months with 🟢 High probability (≥ 50%)',
         value=False
     )
 
-    display_table   = forecast_display.copy()
-    download_table  = forecast_download.copy()
+    display_table  = forecast_display.copy()
+    download_table = forecast_download.copy()
 
     if show_above_50:
         mask           = fcst_plot['avg_buy_probability'] >= 0.5
@@ -492,19 +513,15 @@ else:
     st.subheader('📋 Forecast table')
     st.dataframe(display_table, use_container_width=True, hide_index=True)
 
-    dl_csv_f, dl_pdf_f = st.columns([1, 1])
+    st.download_button(
+        label='⬇️ Download forecast as CSV',
+        data=download_table.to_csv(index=False),
+        file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
+        mime='text/csv',
+        key='download_forecast'
+    )
 
-    with dl_csv_f:
-        st.download_button(
-            label='⬇️ Download forecast as CSV',
-            data=download_table.to_csv(index=False),
-            file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
-            mime='text/csv',
-            key='download_forecast'
-        )
-
-    # ── Historical reference table ────────────────────────────────────────────
-    # Not affected by the toggle
+    # ── Historical reference table — not affected by toggle ───────────────────
     st.subheader('🕰️ Historical purchase data')
     st.write('Actual purchase records used to train the model for this buyer and grade.')
 
@@ -517,7 +534,6 @@ else:
         .reset_index(drop=True)
     )
 
-    hist_display  = None
     hist_download = None
 
     if hist_all.empty:
@@ -534,21 +550,29 @@ else:
         hist_base['Qty']       = hist_base['Qty'].astype(int)
         hist_base['Average']   = hist_base['Average'].round(2)
 
+        # Display version — emojis
         hist_display = hist_base.copy()
         hist_display['Purchased'] = hist_base['purchased'].map(
             {1: '✅ Yes', 0: '❌ No'}
         )
         hist_display = hist_display[
-            ['Month','Purchased','Qty','Average']
-        ].rename(columns={'Qty':'Qty purchased (bags)','Average':'Avg price'})
+            ['Month', 'Purchased', 'Qty', 'Average']
+        ].rename(columns={
+            'Qty':     'Qty purchased (bags)',
+            'Average': 'Avg price'
+        })
 
+        # Download version — no emojis
         hist_download = hist_base.copy()
         hist_download['Purchased'] = hist_base['purchased'].map(
             {1: 'Yes', 0: 'No'}
         )
         hist_download = hist_download[
-            ['Month','Purchased','Qty','Average']
-        ].rename(columns={'Qty':'Qty purchased (bags)','Average':'Avg price'})
+            ['Month', 'Purchased', 'Qty', 'Average']
+        ].rename(columns={
+            'Qty':     'Qty purchased (bags)',
+            'Average': 'Avg price'
+        })
 
         st.dataframe(hist_display, use_container_width=True, hide_index=True)
 
@@ -560,22 +584,27 @@ else:
             key='download_history'
         )
 
-    # ── PDF report button (placed after both tables are built) ────────────────
-    with dl_pdf_f:
-        tables_for_pdf = {'Forecast Table': download_table}
-        if hist_download is not None:
-            tables_for_pdf['Historical Purchase Data'] = hist_download
+    # ── PDF report — placed in the title row column ───────────────────────────
+    tables_for_pdf = {'Forecast Table': download_table}
+    if hist_download is not None:
+        tables_for_pdf['Historical Purchase Data'] = hist_download
 
-        with st.spinner('Preparing PDF report...'):
-            pdf_bytes = build_pdf(
-                title=report_title,
-                chart_fig=fig,
-                tables=tables_for_pdf
-            )
+    with st.spinner('Preparing PDF report...'):
+        pdf_bytes_fcst = build_pdf(
+            title=report_title,
+            chart_fig=fig,
+            tables=tables_for_pdf
+        )
+    with pdf_btn_col:
+        st.markdown('<div style="margin-top:28px;"></div>',
+                    unsafe_allow_html=True)
         st.download_button(
-            label='⬇️ Download full report (PDF)',
-            data=pdf_bytes,
-            file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_report.pdf',
+            label='📄 Download report',
+            data=pdf_bytes_fcst,
+            file_name=(
+                f'{selected_buyer}_{selected_grade}'
+                f'_{selected_year}_report.pdf'
+            ),
             mime='application/pdf',
             key='download_pdf_fcst'
         )
