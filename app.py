@@ -204,6 +204,9 @@ def load_data():
 
     return forecast, historical
 
+forecast, historical = load_data()
+
+
 # ── Constants ─────────────────────────────────────────────────────────────────
 ALL_GRADES  = ['GOLDENTIPS', 'INNOVATIVE', 'SILVERTIPS']
 MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun',
