@@ -19,15 +19,7 @@ st.set_page_config(
 
 # ── Initial loading screen overlay ─────────────────────────────────────────────────────
 st.markdown("""
-<div id="initial-loader" style="
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #111; color: #fff; z-index: 99999;
-    display: flex !important; flex-direction: column !important; 
-    justify-content: center !important; align-items: center !important;
-    font-family: 'Helvetica Neue', sans-serif;
-    animation: fadeOut 3.5s forwards;
-    pointer-events: none;">
-    
+<div id="initial-loader">
     <div class="cup">
         <div class="cup-handle"></div>
         <div class="smoke one"></div>
@@ -38,15 +30,36 @@ st.markdown("""
 </div>
 
 <style>
-    .cup {
+    #initial-loader {
         position: relative;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #111;
+        color: #fff;
+        z-index: 99999;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        font-family: 'Helvetica Neue', sans-serif;
+        animation: shake 3.5s infinite ease-in-out;
+        pointer-events: none;
+    }
+
+    .cup {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
         width: 40px;
         height: 30px;
         background-color: #5b4022cb;
         border: 1px solid #2e2e2e;
         border-radius: 3px 3px 10px 10px;
         z-index: 1;
-        animation: cupPulse 3s infinite ease-in-out;
+        animation: cupPulse 6s infinite ease-in-out;
     }
 
     .cup::before {
@@ -60,7 +73,7 @@ st.markdown("""
         border-top: none;
         border-radius: 50%;
         z-index: -1;
-        animation: cupPulse 3s infinite ease-in-out;
+        animation: cupPulse 6s infinite ease-in-out;
     }
 
     .cup::after {
@@ -73,7 +86,7 @@ st.markdown("""
         background: #da8920ca;
         border: 1px solid #2e2e2e;
         border-radius: 50%;
-        animation: coffeeGlow 3s infinite ease-in-out;
+        animation: coffeeGlow 6s infinite ease-in-out;
     }
 
     .cup-handle {
@@ -94,46 +107,87 @@ st.markdown("""
         left: 50%;
         width: 10px;
         height: 25px;
-        background: rgba(150, 150, 150, 0.4);
+        background: rgba(72, 67, 67, 0.501);
         border-radius: 50%;
         transform: translateX(-50%);
-        animation: rise 2.5s infinite ease-in-out;
-        filter: blur(5px);
+        animation: rise 3s infinite ease-in-out;
+        filter: blur(8px);
     }
 
-    .smoke.one { animation-delay: 0s; }
-    .smoke.two { animation-delay: 0.6s; }
-    .smoke.three { animation-delay: 1.2s; }
+    .smoke.one {
+        animation-delay: 0s;
+        }
+        .smoke.two {
+        animation-delay: 0.8s;
+        }
+        .smoke.three {
+        animation-delay: 1.6s;
+    }
 
     .load {
-        margin-top: 25px;
-        font-size: 14px;
-        color: #ffffff;
-        opacity: 0.8;
-        letter-spacing: 1.5px;
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        color: #2e2e2e;
+        opacity: 0.6;
     }
 
     @keyframes rise {
-        0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
-        40% { opacity: 0.6; }
-        100% { transform: translate(-50%, -70px) scale(1.1); opacity: 0; }
+    0% {
+        transform: translate(-50%, 0) scale(0.4);
+        opacity: 0;
+        }
+    30% {
+        opacity: 0.7;
+        }
+    60% {
+        opacity: 0.4;
+        }
+    100% {
+        transform: translate(-50%, -120px) scale(1);
+        opacity: 0;
+        }
     }
 
-    @keyframes fadeOut {
-        0% { opacity: 1; visibility: visible; }
-        70% { opacity: 1; visibility: visible; }
-        99% { opacity: 0; visibility: visible; }
-        100% { opacity: 0; visibility: hidden; }
+    @keyframes shake {
+    0% {
+        transform: translateX(0) translateY(0) rotate(0);
+        }
+    25% {
+        transform: translateX(-4px) translateY(-2px) rotate(-2deg);
+        }
+    50% {
+        transform: translateX(0) translateY(0) rotate(0);
+        }
+    75% {
+        transform: translateX(4px) translateY(-2px) rotate(2deg);
+        }
+    100% {
+        transform: translateX(0) translateY(0) rotate(0);
+        }
     }
 
+    /* New Animations */
     @keyframes cupPulse {
-        0%, 100% { background-color: #5b4022cb; }
-        50% { background-color: #7a5830cb; }
+    0%,
+    100% {
+        background-color: #5b4022cb;
+        }
+    50% {
+        background-color: #f5f5f5bd;
+        }
     }
 
     @keyframes coffeeGlow {
-        0%, 100% { background: #da8920ca; }
-        50% { background: #fca83ecb; }
+    0%,
+    100% {
+        background: #da8920ca;
+        }
+    50% {
+        background: #fed197d5;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
