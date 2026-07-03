@@ -19,175 +19,67 @@ st.set_page_config(
 
 # ── Initial loading screen overlay ─────────────────────────────────────────────────────
 st.markdown("""
-<div id="initial-loader">
-    <div class="cup">
-        <div class="cup-handle"></div>
-        <div class="smoke one"></div>
-        <div class="smoke two"></div>
-        <div class="smoke three"></div>
+<div id="initial-page-overlay">
+    <div class="loader">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
     </div>
-    <div class="load">Loading Dashboard...</div>
 </div>
 
 <style>
-    #initial-loader {
-        position: relative;
+    /* Full-screen masking layout wrapper */
+    #initial-page-overlay {
+        position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: #111;
-        color: #fff;
+        background: #111111;
         z-index: 99999;
         display: flex !important;
-        flex-direction: column !important;
         justify-content: center !important;
         align-items: center !important;
-        font-family: 'Helvetica Neue', sans-serif;
-        animation: shake 3.5s infinite ease-in-out;
+        animation: smoothFadeOut 3.2s forwards;
         pointer-events: none;
     }
 
-    .cup {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 30px;
-        background-color: #5b4022cb;
-        border: 1px solid #2e2e2e;
-        border-radius: 3px 3px 10px 10px;
-        z-index: 1;
-        animation: cupPulse 6s infinite ease-in-out;
+    /* Your exact custom Loader CSS */
+    .loader {
+        display: flex;
+        gap: 12px; /* Adds clean spacing between your jumping dots */
     }
 
-    .cup::before {
-        content: "";
-        position: absolute;
-        bottom: -5px;
-        width: calc(100% - 2px);
-        height: 6px;
-        background: #5b4022cb;
-        border: 1px solid #2e2e2e;
-        border-top: none;
+    .loader .dot {
+        height: 20px;
+        width: 20px;
         border-radius: 50%;
-        z-index: -1;
-        animation: cupPulse 6s infinite ease-in-out;
+        border: 2px solid #e8e8e8;
+        background: #16b0c1;
+        animation: jump 0.8s ease-in-out infinite alternate;
     }
 
-    .cup::after {
-        content: "";
-        position: absolute;
-        top: -2px;
-        left: 1px;
-        width: calc(100% - 2px);
-        height: 4px;
-        background: #da8920ca;
-        border: 1px solid #2e2e2e;
-        border-radius: 50%;
-        animation: coffeeGlow 6s infinite ease-in-out;
-    }
-
-    .cup-handle {
-        position: absolute;
-        top: 5px;
-        right: -10px;
-        width: 10px;
-        height: 15px;
-        border: 2px solid #2e2e2e;
-        border-left: none;
-        border-radius: 0 10px 10px 0;
-        background: transparent;
-    }
-
-    .smoke {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        width: 10px;
-        height: 25px;
-        background: rgba(72, 67, 67, 0.501);
-        border-radius: 50%;
-        transform: translateX(-50%);
-        animation: rise 3s infinite ease-in-out;
-        filter: blur(8px);
-    }
-
-    .smoke.one {
-        animation-delay: 0s;
-        }
-        .smoke.two {
-        animation-delay: 0.8s;
-        }
-        .smoke.three {
-        animation-delay: 1.6s;
-    }
-
-    .load {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 12px;
-        color: #2e2e2e;
-        opacity: 0.6;
-    }
-
-    @keyframes rise {
-    0% {
-        transform: translate(-50%, 0) scale(0.4);
-        opacity: 0;
-        }
-    30% {
-        opacity: 0.7;
-        }
-    60% {
-        opacity: 0.4;
-        }
-    100% {
-        transform: translate(-50%, -120px) scale(1);
-        opacity: 0;
+    @keyframes jump {
+        100% {
+            background: #661e92;
+            transform: translateY(-3rem) scale(1.9);
         }
     }
 
-    @keyframes shake {
-    0% {
-        transform: translateX(0) translateY(0) rotate(0);
-        }
-    25% {
-        transform: translateX(-4px) translateY(-2px) rotate(-2deg);
-        }
-    50% {
-        transform: translateX(0) translateY(0) rotate(0);
-        }
-    75% {
-        transform: translateX(4px) translateY(-2px) rotate(2deg);
-        }
-    100% {
-        transform: translateX(0) translateY(0) rotate(0);
-        }
-    }
+    .loader .dot:nth-child(1) { animation-delay: 0.1s; }
+    .loader .dot:nth-child(2) { animation-delay: 0.2s; }
+    .loader .dot:nth-child(3) { animation-delay: 0.3s; }
+    .loader .dot:nth-child(4) { animation-delay: 0.4s; }
+    .loader .dot:nth-child(5) { animation-delay: 0.5s; }
 
-    /* New Animations */
-    @keyframes cupPulse {
-    0%,
-    100% {
-        background-color: #5b4022cb;
-        }
-    50% {
-        background-color: #f5f5f5bd;
-        }
-    }
-
-    @keyframes coffeeGlow {
-    0%,
-    100% {
-        background: #da8920ca;
-        }
-    50% {
-        background: #fed197d5;
-        }
+    /* CSS transition layout handler to hand control back to Streamlit */
+    @keyframes smoothFadeOut {
+        0% { opacity: 1; visibility: visible; }
+        75% { opacity: 1; visibility: visible; }
+        99% { opacity: 0; visibility: visible; }
+        100% { opacity: 0; visibility: hidden; display: none; }
     }
 </style>
 """, unsafe_allow_html=True)
