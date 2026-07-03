@@ -475,7 +475,7 @@ with st.sidebar:
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
-                width: 100vw !important;
+                width: 1000vw !important;
                 height: 100vh !important;
                 background: #111111 !important; /* Change to #ffffff if you want a white screen */
                 z-index: 9999999 !important; 
