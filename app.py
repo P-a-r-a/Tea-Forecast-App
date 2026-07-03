@@ -12,7 +12,8 @@ import urllib.request
 st.set_page_config(
     page_title='Tea Buyer Forecast',
     page_icon='♨️',
-    layout='wide'
+    layout='wide',
+    initial_sidebar_state='expanded'
 )
 
 # ── Password gate ─────────────────────────────────────────────────────────────
