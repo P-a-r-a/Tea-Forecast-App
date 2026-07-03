@@ -59,7 +59,7 @@ if not st.session_state['authenticated']:
                         left: 0 !important;
                         width: 100vw !important;
                         height: 100vh !important;
-                        var(--background-color) !important;
+                        background: var(--background-color) !important;
                         z-index: 9999999 !important; 
                         display: flex !important;
                         justify-content: center !important;
