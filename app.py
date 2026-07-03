@@ -550,14 +550,16 @@ else:
         st.divider()
 
         def likelihood_emoji(p):
-            if p >= 0.5:   return '🟢 High'
-            elif p >= 0.3: return '🟡 Medium'
-            else:          return '🔴 Low'
+            if p >= 0.7:   return '🟢 Very High'
+            elif p >= 0.5:   return '🟡 Relatively High'
+            elif p >= 0.3: return '🟠 Low'
+            else:          return '🔴 Very Low'
 
         def likelihood_clean(p):
-            if p >= 0.5:   return 'High'
-            elif p >= 0.3: return 'Medium'
-            else:          return 'Low'
+            if p >= 0.7:   return 'Very High'
+            elif p >= 0.5:   return 'Relatively High'
+            elif p >= 0.3: return 'Low'
+            else:          return 'Very Low'
 
         base = fcst_plot[['month_label', 'avg_buy_probability', 'expected_qty', 'probability_wtd_qty']].copy()
         base['expected_qty']        = base['expected_qty'].round(1)
