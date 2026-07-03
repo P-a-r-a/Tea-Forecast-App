@@ -475,7 +475,7 @@ with st.sidebar:
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
-                width: 1000vw !important;
+                width: 100vw !important;
                 height: 100vh !important;
                 background: #111111 !important; /* Change to #ffffff if you want a white screen */
                 z-index: 9999999 !important; 
@@ -487,7 +487,7 @@ with st.sidebar:
             }
 
             .loader {
-                width: 1000px;
+
                 height: 100px;
                 position: relative;
                 animation: shake 3s infinite ease-in-out;
