@@ -581,12 +581,12 @@ else:
             'expected_qty': 'Predicted Quantity (bags)', 'probability_wtd_qty': 'Weighted Quantity (bags)',
         })[['Month', 'Probability of Purchase', 'Likelihood', 'Predicted Quantity (bags)', 'Weighted Quantity (bags)']]
 
-        show_above_50 = st.toggle('Show only months with 🟢 High probability (≥ 70%)', value=False)
+        show_above_70 = st.toggle('Show only months with 🟢 High probability (≥ 70%)', value=False)
         display_table  = forecast_display.copy()
         download_table = forecast_download.copy()
 
-        if show_above_50:
-            mask           = fcst_plot['avg_buy_probability'] >= 0.5
+        if show_above_70:
+            mask           = fcst_plot['avg_buy_probability'] >= 0.69
             display_table  = forecast_display[mask.values].reset_index(drop=True)
             download_table = forecast_download[mask.values].reset_index(drop=True)
 
