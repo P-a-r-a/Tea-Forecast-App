@@ -23,23 +23,21 @@ st.markdown("""
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: #111; color: #fff; z-index: 99999;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        font-family: 'Helvetica Neue', sans-serif; transition: opacity 0.5s ease;">
+        font-family: 'Helvetica Neue', sans-serif;
+        animation: fadeOut 1.2s forwards;
+        animation-delay: 0.8s;
+        pointer-events: none;">
         <div style="border: 4px solid #f3f3f3; border-top: 4px solid #4CAF50; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
-        <h3 style="margin-top: 20px; font-weight: 300; letter-spacing: 2px;">♨️ INITIALIZING TEA FORECAST...</h3>
+        <h3 style="margin-top: 20px; font-weight: 300; letter-spacing: 2px; color: #fff;">♨️ INITIALIZING TEA FORECAST...</h3>
     </div>
     <style>
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeOut {
+            0% { opacity: 1; visibility: visible; }
+            99% { opacity: 0; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; display: none; }
+        }
     </style>
-    <script>
-        // Automatically fade out and remove the loader after page loads
-        setTimeout(() => {
-            const loader = document.getElementById('initial-loader');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 500);
-            }
-        }, 800);
-    </script>
 """, unsafe_allow_html=True)
 
 # ── Password gate ─────────────────────────────────────────────────────────────
