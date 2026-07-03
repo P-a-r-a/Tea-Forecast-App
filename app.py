@@ -22,13 +22,13 @@ st.markdown("""
     <div id="initial-loader" style="
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: #111; color: #fff; z-index: 99999;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        display: flex !important; flex-direction: column !important; 
+        justify-content: center !important; align-items: center !important;
         font-family: 'Helvetica Neue', sans-serif;
         animation: fadeOut 1.2s forwards;
         animation-delay: 2s;
         pointer-events: none;">
         
-        <!-- The cup is now a native flex item, perfectly centered -->
         <div class="cup">
             <div class="cup-handle"></div>
             <div class="smoke one"></div>
@@ -40,7 +40,7 @@ st.markdown("""
     
     <style>
         .cup {
-            position: relative; /* Changed from absolute to play nice with flex centering */
+            position: relative;
             width: 40px;
             height: 30px;
             background-color: #5b4022cb;
@@ -113,7 +113,7 @@ st.markdown("""
         }
 
         .load {
-            margin-top: 25px; /* Creates clean spacing directly beneath the centered cup */
+            margin-top: 25px;
             font-size: 14px;
             color: #ffffff;
             opacity: 0.8;
@@ -137,7 +137,6 @@ st.markdown("""
             }
         }
 
-        /* Clean fade out so the app becomes clickable */
         @keyframes fadeOut {
             0% { opacity: 1; visibility: visible; }
             99% { opacity: 0; visibility: visible; }
