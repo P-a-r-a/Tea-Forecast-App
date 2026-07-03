@@ -59,7 +59,7 @@ if not st.session_state['authenticated']:
                         left: 0 !important;
                         width: 100vw !important;
                         height: 100vh !important;
-                        background: #111111 !important;
+                        var(--background-color) !important;
                         z-index: 9999999 !important; 
                         display: flex !important;
                         justify-content: center !important;
@@ -84,6 +84,7 @@ if not st.session_state['authenticated']:
                         background-color: #5b4022cb;
                         border: 1px solid #2e2e2e;
                         border-radius: 3px 3px 10px 10px;
+                        border-color: var(--primary-color) !important;
                         z-index: 1;
                         animation: cupPulse 6s infinite ease-in-out;
                     }
@@ -96,6 +97,7 @@ if not st.session_state['authenticated']:
                         height: 6px;
                         background: #5b4022cb;
                         border: 1px solid #2e2e2e;
+                        border-color: var(--primary-color) !important;
                         border-top: none;
                         border-radius: 50%;
                         z-index: -1;
@@ -112,6 +114,7 @@ if not st.session_state['authenticated']:
                         background: #da8920ca;
                         border: 1px solid #2e2e2e;
                         border-radius: 50%;
+                        border-color: var(--primary-color) !important;
                         animation: coffeeGlow 6s infinite ease-in-out;
                     }
 
@@ -122,6 +125,7 @@ if not st.session_state['authenticated']:
                         width: 10px;
                         height: 15px;
                         border: 2px solid #2e2e2e;
+                        border-color: var(--primary-color) !important;
                         border-left: none;
                         border-radius: 0 10px 10px 0;
                         background: transparent;
@@ -150,7 +154,7 @@ if not st.session_state['authenticated']:
                         left: 50%;
                         transform: translateX(-50%);
                         font-size: 12px;
-                        color: #ffffff;
+                        color: var(--text-color) !important;
                         opacity: 0.8;
                     }
 
