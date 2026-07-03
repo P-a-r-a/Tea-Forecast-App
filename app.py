@@ -306,7 +306,7 @@ if selected_year <= 2025:
         st.markdown('<div style="margin-top:28px;"></div>',
                     unsafe_allow_html=True)
         st.download_button(
-            label='📄 Download report',
+            label='⬇️ Download Full report',
             data=pdf_bytes_hist,
             file_name=(
                 f'{selected_buyer}_{selected_grade}'
