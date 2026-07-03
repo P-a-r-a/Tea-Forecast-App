@@ -24,26 +24,6 @@ if 'authenticated' not in st.session_state:
 
 if not st.session_state['authenticated']:
     # Clean spacing for the centered login form container
-    st.markdown("""
-        <div id="login-container">
-            <style>
-                /* Force the native view block container to handle centering cleanly */
-                [data-testid="stAppViewBlockContainer"] {
-                    padding-top: 0rem !important;
-                    padding-bottom: 0rem !important;
-                }
-                
-                #login-container {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    min-height: 80vh; /* Fills up the viewport window automatically */
-                    width: 100%;
-                }
-            </style>
-        </div>
-        """, unsafe_allow_html=True)
 
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     with center_col:
