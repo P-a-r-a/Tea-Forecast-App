@@ -565,7 +565,7 @@ with st.sidebar:
 
             .load {
                 position: absolute;
-                width: 200px;
+                width: 150px;
                 bottom: 0;
                 left: 50%;
                 transform: translateX(-50%);
