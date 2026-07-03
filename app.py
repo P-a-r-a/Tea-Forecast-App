@@ -550,8 +550,8 @@ else:
         st.divider()
 
         def likelihood_emoji(p):
-            if p >= 0.7:   return '🟢 Very High'
-            elif p >= 0.5:   return '🟡 Relatively High'
+            if p >= 0.69:   return '🟢 Very High'
+            elif p >= 0.49:   return '🟡 Relatively High'
             elif p >= 0.3: return '🟠 Low'
             else:          return '🔴 Very Low'
 
