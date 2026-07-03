@@ -59,7 +59,7 @@ if not st.session_state['authenticated']:
                         left: 0 !important;
                         width: 100vw !important;
                         height: 100vh !important;
-                        background: var(--background-color) !important;
+                        background: var(--background-color, #111111) !important;
                         z-index: 9999999 !important; 
                         display: flex !important;
                         justify-content: center !important;
@@ -322,7 +322,7 @@ with st.sidebar:
                 left: 0 !important;
                 width: 100vw !important;
                 height: 100vh !important;
-                background: #111111 !important; /* Change to #ffffff if you want a white screen */
+                background: var(--background-color, #111111) !important;
                 z-index: 9999999 !important; 
                 display: flex !important;
                 justify-content: center !important;
@@ -347,6 +347,7 @@ with st.sidebar:
                 height: 30px;
                 background-color: #5b4022cb;
                 border: 1px solid #2e2e2e;
+                border-color: var(--primary-color) !important;
                 border-radius: 3px 3px 10px 10px;
                 z-index: 1;
                 animation: cupPulse 6s infinite ease-in-out;
@@ -360,6 +361,7 @@ with st.sidebar:
                 height: 6px;
                 background: #5b4022cb;
                 border: 1px solid #2e2e2e;
+                border-color: var(--primary-color) !important;
                 border-top: none;
                 border-radius: 50%;
                 z-index: -1;
@@ -375,6 +377,7 @@ with st.sidebar:
                 height: 4px;
                 background: #da8920ca;
                 border: 1px solid #2e2e2e;
+                border-color: var(--primary-color) !important;
                 border-radius: 50%;
                 animation: coffeeGlow 6s infinite ease-in-out;
             }
@@ -386,6 +389,7 @@ with st.sidebar:
                 width: 10px;
                 height: 15px;
                 border: 2px solid #2e2e2e;
+                border-color: var(--primary-color) !important;
                 border-left: none;
                 border-radius: 0 10px 10px 0;
                 background: transparent;
@@ -416,7 +420,7 @@ with st.sidebar:
                 text-align: center;
                 transform: translateX(-50%);
                 font-size: 12px;
-                color: #ffffff; /* Change to #333333 if using a white background */
+                color: var(--text-color) !important;
                 opacity: 0.8;
             }
 
