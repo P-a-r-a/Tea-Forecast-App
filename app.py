@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -19,312 +18,346 @@ st.set_page_config(
 )
 
 # ── Initial splash screen overlay ─────────────────────────────────────────────────────
-st.markdown("""
-<div id="splash-screen-overlay">
-    <div class="splash-content">
-        <h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
-        <div class="loader">
-            <div class="cup"><div class="cup-handle"></div></div>
-        </div>
-        <div class="scroll-prompt">
-            <p class="desktop-text">Scroll down or click to get started ↓</p>
-            <p class="mobile-text">Swipe up or tap to get started ↑</p>
-        </div>
-    </div>
-</div>
 
-<style>
-#splash-screen-overlay {
-    position: relative;
-    width: 100%;
-    height: 85vh; /* Safe fallback height */
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    background: #111111;
-    color: #ffffff;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    border-radius: 12px;
-    margin-bottom: 40px;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-.splash-content {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-}
-.splash-title {
-    font-size: 2.5rem !important;
-    font-weight: 300 !important;
-    letter-spacing: 2px;
-    color: #ffffff !important;
-    margin: 0 !important;
-}
-.loader { width: 60px; height: 50px; position: relative; }
-.cup {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 38px;
-    background-color: #5b4022cb;
-    border: 2px solid #ffffff;
-    border-radius: 3px 3px 12px 12px;
-}
-.cup-handle {
-    position: absolute;
-    top: 6px;
-    right: -12px;
-    width: 12px;
-    height: 18px;
-    border: 2px solid #ffffff;
-    border-left: none;
-    border-radius: 0 10px 10px 0;
-}
-.scroll-prompt { font-size: 1rem; letter-spacing: 1px; opacity: 0.8; animation: bounce 2s infinite; }
-.mobile-text { display: none; }
-.desktop-text { display: block; }
-@media (max-width: 768px) {
-    .splash-title { font-size: 1.8rem !important; }
-    .mobile-text { display: block; }
-    .desktop-text { display: none; }
-}
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-8px); }
-    60% { transform: translateY(-4px); }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ACTIVE SCROLL/SWIPE CAPTURE CONTROLLER
-components.html("""
-<script>
-    const doc = window.parent.document;
-    
-    function navigateToLogin() {
-        const target = doc.getElementById('auth-section');
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
-
-    // Connect trigger loops onto root layout structures
-    setTimeout(() => {
-        const mainAppWindow = doc.querySelector('.main') || doc.querySelector('[data-testid="stAppViewMain"]') || window.parent;
-        const splashCard = doc.getElementById('splash-screen-overlay');
-        
-        // 1. Instantly trigger on manual interaction
-        if(splashCard) {
-            splashCard.onclick = navigateToLogin;
-        }
-
-        // 2. Intercept desktop wheel rotation movements
-        mainAppWindow.addEventListener('wheel', (e) => {
-            if (e.deltaY > 5) {
-                navigateToLogin();
-            }
-        }, { passive: true });
-
-        // 3. Intercept mobile drag tracking
-        let touchStart = 0;
-        doc.addEventListener('touchstart', (e) => {
-            touchStart = e.touches[0].clientY;
-        }, { passive: true });
-
-        doc.addEventListener('touchend', (e) => {
-            let touchEnd = e.changedTouches[0].clientY;
-            if (touchStart - touchEnd > 30) { 
-                navigateToLogin();
-            }
-        }, { passive: true });
-    }, 500);
-</script>
-""", height=0, width=0)
 
 # ── Password gate ─────────────────────────────────────────────────────────────
+# Initialize authentication state
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # EXPLICIT WINDOW HEIGHT ANCHOR TARGET FOR TRANSITIONS
-    st.markdown('<div id="auth-section" style="min-height: 100vh; padding-top: 15vh; margin-top: 5vh;">', unsafe_allow_html=True)
-
-    pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
-    with center_col:
-        st.markdown("<h2 style='text-align: center;'>Secure Access</h2>",
-                    unsafe_allow_html=True)
-        with st.form(key='login_form', clear_on_submit=False):
-            password = st.text_input('Enter password', type='password',
-                                     label_visibility='collapsed')
-            btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
-            with btn_col:
-                submit_button = st.form_submit_button(
-                    label='Login', width='stretch')
-        if submit_button:
-            if password == st.secrets['APP_PASSWORD']:
-                st.session_state['authenticated'] = True
-                
-                # Display a full-screen overlay with a decryption animation
-                st.markdown("""
-                <div id="initial-page-overlay">
-                    <div class="loader">
-                        <div class="cup">
-                            <div class="cup-handle"></div>
-                            <div class="smoke one"></div>
-                            <div class="smoke two"></div>
-                            <div class="smoke three"></div>
-                        </div>
-                        <div class="load">Authenticating...</div>
-                    </div>
+    # ── COMBINED WRAPPER FOR OVERLAY & AUTH FORM ─────────────────────────────
+    st.markdown("""
+    <!-- 1. THE REVEALABLE SPLASH LAYER -->
+    <div id="splash-layer">
+        <div class="splash-content">
+            <h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
+            <div class="loader-cup">
+                <div class="cup">
+                    <div class="cup-handle"></div>
                 </div>
+            </div>
+            <div class="scroll-prompt">
+                <p class="desktop-text">Scroll down or click to enter ↓</p>
+                <p class="mobile-text">Swipe up or tap to enter ↑</p>
+            </div>
+        </div>
+    </div>
+                
+    <!-- INTERACTION INJECTOR -->
+    <script>
+        const doc = window.parent.document;
+        
+        function dismissSplash() {
+            const splash = doc.getElementById('splash-layer');
+            if (splash) {
+                splash.classList.add('dismissed');
+            }
+        }
 
-                <style>
-                    #initial-page-overlay {
-                        position: fixed !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100vw !important;
-                        height: 100vh !important;
-                        background: #111111 !important;
-                        z-index: 9999999 !important; 
-                        display: flex !important;
-                        justify-content: center !important;
-                        align-items: center !important;
-                        animation: smoothFadeOut 4.5s forwards !important;
-                        pointer-events: none !important;
-                    }
+        setTimeout(() => {
+            const splash = doc.getElementById('splash-layer');
+            const mainAppWindow = doc.querySelector('.main') || doc.querySelector('[data-testid="stAppViewMain"]') || window.parent;
+            
+            if (splash) {
+                // Dismiss on direct tap/click
+                splash.onclick = dismissSplash;
+            }
 
-                    .loader {
-                        width: 200px;
-                        height: 100px;
-                        position: relative;
-                        animation: shake 3s infinite ease-in-out;
-                    }
+            // Dismiss on Scroll Wheel down
+            mainAppWindow.addEventListener('wheel', (e) => {
+                if (e.deltaY > 5) dismissSplash();
+            }, { passive: true });
 
-                    .cup {
-                        position: absolute;
-                        bottom: 20px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        width: 40px;
-                        height: 30px;
-                        background-color: #5b4022cb;
-                        border: 1px solid #2e2e2e;
-                        border-radius: 3px 3px 10px 10px;
-                        z-index: 1;
-                        animation: cupPulse 6s infinite ease-in-out;
-                    }
+            // Dismiss on Mobile Touch Swipe Up
+            let touchStart = 0;
+            doc.addEventListener('touchstart', (e) => {
+                touchStart = e.touches[0].clientY;
+            }, { passive: true });
 
-                    .cup::before {
-                        content: "";
-                        position: absolute;
-                        bottom: -5px;
-                        width: calc(100% - 2px);
-                        height: 6px;
-                        background: #5b4022cb;
-                        border: 1px solid #2e2e2e;
-                        border-top: none;
-                        border-radius: 50%;
-                        z-index: -1;
-                        animation: cupPulse 6s infinite ease-in-out;
-                    }
+            doc.addEventListener('touchend', (e) => {
+                let touchEnd = e.changedTouches[0].clientY;
+                if (touchStart - touchEnd > 30) { 
+                    dismissSplash();
+                }
+            }, { passive: true });
+        }, 300);
+    </script>
 
-                    .cup::after {
-                        content: "";
-                        position: absolute;
-                        top: -2px;
-                        left: 1px;
-                        width: calc(100% - 2px);
-                        height: 4px;
-                        background: #da8920ca;
-                        border: 1px solid #2e2e2e;
-                        border-radius: 50%;
-                        animation: coffeeGlow 6s infinite ease-in-out;
-                    }
+    <style>
+        /* Force Streamlit app view container to hide outer bounds cleanly during shifts */
+        [data-testid="stAppViewBlockContainer"] {
+            position: relative !important;
+            overflow: hidden !important;
+        }
 
-                    .cup-handle {
-                        position: absolute;
-                        top: 5px;
-                        right: -10px;
-                        width: 10px;
-                        height: 15px;
-                        border: 2px solid #2e2e2e;
-                        border-left: none;
-                        border-radius: 0 10px 10px 0;
-                        background: transparent;
-                    }
+        /* Splash Layer covering the exact view deck area */
+        #splash-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #111111;
+            color: #ffffff;
+            z-index: 999999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+            transform: translateY(0);
+        }
 
-                    .smoke {
-                        position: absolute;
-                        bottom: 100%;
-                        left: 50%;
-                        width: 10px;
-                        height: 25px;
-                        background: rgba(220, 220, 220, 0.6); 
-                        border-radius: 50%;
-                        transform: translateX(-50%);
-                        animation: rise 3s infinite ease-in-out;
-                        filter: blur(5px); 
-                    }
+        /* Slide up off-screen animation class */
+        #splash-layer.dismissed {
+            transform: translateY(-100vh);
+            opacity: 0;
+            pointer-events: none;
+        }
 
-                    .smoke.one { animation-delay: 0s; }
-                    .smoke.two { animation-delay: 0.8s; }
-                    .smoke.three { animation-delay: 1.6s; }
+        .splash-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
 
-                    .load {
-                        position: absolute;
-                        bottom: 0;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        font-size: 12px;
-                        color: #ffffff;
-                        opacity: 0.8;
-                    }
+        .splash-title {
+            font-size: 2.5rem !important;
+            font-weight: 300 !important;
+            letter-spacing: 2px;
+            color: #ffffff !important;
+            margin: 0 !important;
+        }
 
-                    @keyframes rise {
-                        0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
-                        30% { opacity: 0.7; }
-                        60% { opacity: 0.4; }
-                        100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
-                    }
+        .loader-cup {
+            width: 60px;
+            height: 50px;
+            position: relative;
+        }
 
-                    @keyframes shake {
-                        0% { transform: translateX(0) translateY(0) rotate(0); }
-                        25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
-                        50% { transform: translateX(0) translateY(0) rotate(0); }
-                        75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
-                        100% { transform: translateX(0) translateY(0) rotate(0); }
-                    }
+        .cup {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 38px;
+            background-color: #5b4022cb;
+            border: 2px solid #ffffff;
+            border-radius: 3px 3px 12px 12px;
+        }
 
-                    @keyframes cupPulse {
-                        0%, 100% { background-color: #5b4022cb; }
-                        50% { background-color: #f5f5f5bd; }
-                    }
+        .cup-handle {
+            position: absolute;
+            top: 6px;
+            right: -12px;
+            width: 12px;
+            height: 18px;
+            border: 2px solid #ffffff;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
 
-                    @keyframes coffeeGlow {
-                        0%, 100% { background: #da8920ca; }
-                        50% { background: #fed197d5; }
-                    }
+        .scroll-prompt {
+            font-size: 1rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            animation: bounce 2s infinite;
+        }
 
-                    @keyframes smoothFadeOut {
-                        0% { opacity: 1; visibility: visible; }
-                        80% { opacity: 1; visibility: visible; }
-                        100% { opacity: 0; visibility: hidden; display: none; }
-                    }
-                </style>
-                """, unsafe_allow_html=True)
-                time.sleep(1.5)
-                st.rerun()
-            else:
-                st.error('Incorrect password.')
+        .mobile-text { display: none; }
+        .desktop-text { display: block; }
 
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.stop()
+        @media (max-width: 768px) {
+            .splash-title { font-size: 1.8rem !important; }
+            .mobile-text { display: block; }
+            .desktop-text { display: none; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ── 2. THE AUTHENTICATION FORM BELOW ─────────────────────────────────────
+    # This sits naturally on the page canvas layout beneath the global splash view wrapper
+st.markdown('<div style="margin-top: 25vh; min-height: 70vh;">', unsafe_allow_html=True)
+
+pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
+with center_col:
+    st.markdown("<h2 style='text-align: center;'>Secure Access</h2>", unsafe_allow_html=True)
+    with st.form(key='login_form', clear_on_submit=False):
+        password = st.text_input('Enter password', type='password', label_visibility='collapsed')
+        btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
+        with btn_col:
+            submit_button = st.form_submit_button(label='Login', width='stretch')
+            
+    if submit_button:
+        if password == st.secrets['APP_PASSWORD']:
+            st.session_state['authenticated'] = True
+            
+            # Render the post-authentication loading coffee cup animation overlay
+            st.markdown("""
+            <div id="auth-success-overlay">
+                <div class="success-loader">
+                    <div class="auth-cup">
+                        <div class="auth-cup-handle"></div>
+                        <div class="smoke one"></div>
+                        <div class="smoke two"></div>
+                        <div class="smoke three"></div>
+                    </div>
+                    <div class="load-text">Authenticating...</div>
+                </div>
+            </div>
+
+            <style>
+                #auth-success-overlay {
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    background: #111111 !important;
+                    z-index: 9999999 !important; 
+                    display: flex !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                    animation: smoothFadeOut 4.5s forwards !important;
+                    pointer-events: none !important;
+                }
+
+                .success-loader {
+                    width: 200px;
+                    height: 100px;
+                    position: relative;
+                    animation: shake 3s infinite ease-in-out;
+                }
+
+                .auth-cup {
+                    position: absolute;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 40px;
+                    height: 30px;
+                    background-color: #5b4022cb;
+                    border: 1px solid #2e2e2e;
+                    border-radius: 3px 3px 10px 10px;
+                    z-index: 1;
+                    animation: cupPulse 6s infinite ease-in-out;
+                }
+
+                .auth-cup::before {
+                    content: "";
+                    position: absolute;
+                    bottom: -5px;
+                    width: calc(100% - 2px);
+                    height: 6px;
+                    background: #5b4022cb;
+                    border: 1px solid #2e2e2e;
+                    border-top: none;
+                    border-radius: 50%;
+                    z-index: -1;
+                    animation: cupPulse 6s infinite ease-in-out;
+                }
+
+                .auth-cup::after {
+                    content: "";
+                    position: absolute;
+                    top: -2px;
+                    left: 1px;
+                    width: calc(100% - 2px);
+                    height: 4px;
+                    background: #da8920ca;
+                    border: 1px solid #2e2e2e;
+                    border-radius: 50%;
+                    animation: coffeeGlow 6s infinite ease-in-out;
+                }
+
+                .auth-cup-handle {
+                    position: absolute;
+                    top: 5px;
+                    right: -10px;
+                    width: 10px;
+                    height: 15px;
+                    border: 2px solid #2e2e2e;
+                    border-left: none;
+                    border-radius: 0 10px 10px 0;
+                    background: transparent;
+                }
+
+                .smoke {
+                    position: absolute;
+                    bottom: 100%;
+                    left: 50%;
+                    width: 10px;
+                    height: 25px;
+                    background: rgba(220, 220, 220, 0.6); 
+                    border-radius: 50%;
+                    transform: translateX(-50%);
+                    animation: rise 3s infinite ease-in-out;
+                    filter: blur(5px); 
+                }
+
+                .smoke.one { animation-delay: 0s; }
+                .smoke.two { animation-delay: 0.8s; }
+                .smoke.three { animation-delay: 1.6s; }
+
+                .load-text {
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 12px;
+                    color: #ffffff;
+                    opacity: 0.8;
+                }
+
+                @keyframes rise {
+                    0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+                    30% { opacity: 0.7; }
+                    60% { opacity: 0.4; }
+                    100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
+                }
+
+                @keyframes shake {
+                    0% { transform: translateX(0) translateY(0) rotate(0); }
+                    25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
+                    50% { transform: translateX(0) translateY(0) rotate(0); }
+                    75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
+                    100% { transform: translateX(0) translateY(0) rotate(0); }
+                }
+
+                @keyframes cupPulse {
+                    0%, 100% { background-color: #5b4022cb; }
+                    50% { background-color: #f5f5f5bd; }
+                }
+
+                @keyframes coffeeGlow {
+                    0%, 100% { background: #da8920ca; }
+                    50% { background: #fed197d5; }
+                }
+
+                @keyframes smoothFadeOut {
+                    0% { opacity: 1; visibility: visible; }
+                    80% { opacity: 1; visibility: visible; }
+                    100% { opacity: 0; visibility: hidden; display: none; }
+                }
+            </style>
+            """, unsafe_allow_html=True)
+            time.sleep(1.5)
+            st.rerun()
+        else:
+            st.error('Incorrect password.')
+            
+st.markdown('</div>', unsafe_allow_html=True)
+st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data
