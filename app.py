@@ -59,18 +59,21 @@ ALL_MONTHS  = pd.DataFrame({
 
 # ── PDF generation helper ─────────────────────────────────────────────────────
 def build_pdf(title, chart_fig, tables: dict) -> bytes:
-    """
-    Renders a Plotly figure to a PNG then builds a PDF with
-    the chart followed by each table passed in `tables`.
-    tables = {'Table title': dataframe, ...}
-    Returns PDF as bytes.
-    """
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
+    # Use DejaVu — bundled with fpdf2, supports full Unicode
+    # This handles all special characters in buyer names
+    pdf.add_font('DejaVu', '',
+                 '/home/adminuser/venv/lib/python3.14/site-packages/fpdf/fonts/DejaVuSans.ttf',
+                 uni=True)
+    pdf.add_font('DejaVu', 'B',
+                 '/home/adminuser/venv/lib/python3.14/site-packages/fpdf/fonts/DejaVuSans-Bold.ttf',
+                 uni=True)
+
     # Title
-    pdf.set_font('Helvetica', 'B', 16)
+    pdf.set_font('DejaVu', 'B', 16)
     pdf.cell(0, 10, title, ln=True, align='C')
     pdf.ln(4)
 
@@ -85,22 +88,22 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
 
     # Tables
     for table_title, df in tables.items():
-        pdf.set_font('Helvetica', 'B', 12)
+        pdf.set_font('DejaVu', 'B', 12)
         pdf.cell(0, 8, table_title, ln=True)
         pdf.ln(2)
 
-        col_count  = len(df.columns)
-        col_width  = 190 / col_count
+        col_count = len(df.columns)
+        col_width = 190 / col_count
 
         # Header row
-        pdf.set_font('Helvetica', 'B', 9)
+        pdf.set_font('DejaVu', 'B', 9)
         pdf.set_fill_color(220, 230, 241)
         for col in df.columns:
             pdf.cell(col_width, 7, str(col), border=1, fill=True)
         pdf.ln()
 
         # Data rows
-        pdf.set_font('Helvetica', '', 9)
+        pdf.set_font('DejaVu', '', 9)
         for _, row in df.iterrows():
             for val in row:
                 pdf.cell(col_width, 6, str(val), border=1)
