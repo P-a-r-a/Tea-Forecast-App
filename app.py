@@ -162,16 +162,35 @@ with st.sidebar:
 
     grades_with_data = source['Grade'].unique().tolist()
 
+    # Preserve selected grade across year changes using session state
+    if 'selected_grade' not in st.session_state:
+        st.session_state['selected_grade'] = ALL_GRADES[0]
+
     # Append "- no data" marker to inactive grades so user can tell at a glance
     grade_display_list = [
         g if g in grades_with_data else f'{g}  - no data'
         for g in ALL_GRADES
     ]
 
-    selected_grade_display = st.selectbox('Select grade', grade_display_list)
+    # Find the index of the currently stored grade in the display list
+    # Match by checking if the stored grade is contained in the display string
+    current_index = 0
+    for i, display_str in enumerate(grade_display_list):
+        if st.session_state['selected_grade'] in display_str:
+            current_index = i
+            break
+
+    selected_grade_display = st.selectbox(
+        'Select grade',
+        grade_display_list,
+        index=current_index
+    )
 
     # Strip marker to get the clean grade name used in all filters
     selected_grade = selected_grade_display.replace('  - no data', '').strip()
+
+    # Save back to session state so it persists when year changes
+    st.session_state['selected_grade'] = selected_grade
 
 # ═════════════════════════════════════════════════════════════════════════════
 # HISTORICAL YEARS (2023 – 2025)
