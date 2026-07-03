@@ -11,7 +11,7 @@ import urllib.request
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title='Tea Buyer Forecast',
-    page_icon='🫖',
+    page_icon='♨️',
     layout='wide'
 )
 
@@ -135,7 +135,7 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
     return bytes(pdf.output())
 
 # ── Main UI ───────────────────────────────────────────────────────────────────
-st.title('🫖 Specialty Tea Buyer Forecast')
+st.title('♨️ Specialty Tea Buyer Forecast')
 st.write('Select a buyer, year, and grade to see their monthly forecast.')
 
 # ── Sidebar: Buyer | Year | Grade ────────────────────────────────────────────
