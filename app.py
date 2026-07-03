@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -20,74 +21,23 @@ st.set_page_config(
 # ── Initial splash screen overlay ─────────────────────────────────────────────────────
 st.markdown("""
 <div id="splash-screen-overlay">
-<div class="splash-content">
-<h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
-<div class="loader">
-<div class="cup">
-<div class="cup-handle"></div>
+    <div class="splash-content">
+        <h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
+        <div class="loader">
+            <div class="cup"><div class="cup-handle"></div></div>
+        </div>
+        <div class="scroll-prompt">
+            <p class="desktop-text">Scroll down or click to get started ↓</p>
+            <p class="mobile-text">Swipe up or tap to get started ↑</p>
+        </div>
+    </div>
 </div>
-</div>
-<div class="scroll-prompt">
-<p class="desktop-text">Scroll down to get started ↓</p>
-<p class="mobile-text">Swipe up to get started ↑</p>
-</div>
-</div>
-</div>
-
-<!-- Automated Smooth Scroll Trigger Script -->
-<script>
-function initAutoscroll() {
-    const splash = document.getElementById('splash-screen-overlay');
-    const authSection = window.parent.document.getElementById('auth-section');
-    
-    if (!splash) return;
-
-    // Detect user scrolling attempts
-    const scrollContainer = window.parent.document.querySelector('[data-testid="stAppViewMain"]') || window.parent;
-    
-    let triggered = false;
-    const handleScroll = () => {
-        const currentScroll = scrollContainer.scrollTop || window.parent.pageYOffset;
-        if (currentScroll > 10 && !triggered) {
-            triggered = true;
-            const target = window.parent.document.getElementById('auth-section');
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            // Remove listener after trigger to let user scroll back up freely if they want
-            scrollContainer.removeEventListener('scroll', handleScroll);
-        }
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Mobile Touch/Swipe handling
-    let touchStart = 0;
-    window.parent.document.addEventListener('touchstart', e => {
-        touchStart = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.parent.document.addEventListener('touchend', e => {
-        let touchEnd = e.changedTouches[0].clientY;
-        if (touchStart - touchEnd > 30 && !triggered) { // Swiped up
-            triggered = true;
-            const target = window.parent.document.getElementById('auth-section');
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    }, { passive: true });
-}
-
-// Execute trigger checking inside the parent Streamlit DOM window layer
-setTimeout(initAutoscroll, 300);
-</script>
 
 <style>
 #splash-screen-overlay {
     position: relative;
     width: 100%;
-    height: 92vh; /* Keeps it perfectly locked to almost full view height */
+    height: 85vh; /* Safe fallback height */
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -95,7 +45,8 @@ setTimeout(initAutoscroll, 300);
     color: #ffffff;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     border-radius: 12px;
-    margin-bottom: 80px;
+    margin-bottom: 40px;
+    cursor: pointer;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .splash-content {
@@ -112,11 +63,7 @@ setTimeout(initAutoscroll, 300);
     color: #ffffff !important;
     margin: 0 !important;
 }
-.loader {
-    width: 60px;
-    height: 50px;
-    position: relative;
-}
+.loader { width: 60px; height: 50px; position: relative; }
 .cup {
     position: absolute;
     bottom: 10px;
@@ -128,27 +75,6 @@ setTimeout(initAutoscroll, 300);
     border: 2px solid #ffffff;
     border-radius: 3px 3px 12px 12px;
 }
-.cup::before {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    width: calc(100% - 2px);
-    height: 6px;
-    background: #5b4022cb;
-    border: 2px solid #ffffff;
-    border-top: none;
-    border-radius: 50%;
-}
-.cup::after {
-    content: "";
-    position: absolute;
-    top: -2px;
-    left: 2px;
-    width: calc(100% - 4px);
-    height: 5px;
-    background: #da8920ca;
-    border-radius: 50%;
-}
 .cup-handle {
     position: absolute;
     top: 6px;
@@ -159,15 +85,7 @@ setTimeout(initAutoscroll, 300);
     border-left: none;
     border-radius: 0 10px 10px 0;
 }
-.scroll-prompt {
-    font-size: 1rem;
-    letter-spacing: 1px;
-    opacity: 0.8;
-    animation: bounce 2s infinite;
-}
-.scroll-prompt p {
-    margin: 0 !important;
-}
+.scroll-prompt { font-size: 1rem; letter-spacing: 1px; opacity: 0.8; animation: bounce 2s infinite; }
 .mobile-text { display: none; }
 .desktop-text { display: block; }
 @media (max-width: 768px) {
@@ -183,13 +101,58 @@ setTimeout(initAutoscroll, 300);
 </style>
 """, unsafe_allow_html=True)
 
+# ACTIVE SCROLL/SWIPE CAPTURE CONTROLLER
+components.html("""
+<script>
+    const doc = window.parent.document;
+    
+    function navigateToLogin() {
+        const target = doc.getElementById('auth-section');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Connect trigger loops onto root layout structures
+    setTimeout(() => {
+        const mainAppWindow = doc.querySelector('.main') || doc.querySelector('[data-testid="stAppViewMain"]') || window.parent;
+        const splashCard = doc.getElementById('splash-screen-overlay');
+        
+        // 1. Instantly trigger on manual interaction
+        if(splashCard) {
+            splashCard.onclick = navigateToLogin;
+        }
+
+        // 2. Intercept desktop wheel rotation movements
+        mainAppWindow.addEventListener('wheel', (e) => {
+            if (e.deltaY > 5) {
+                navigateToLogin();
+            }
+        }, { passive: true });
+
+        // 3. Intercept mobile drag tracking
+        let touchStart = 0;
+        doc.addEventListener('touchstart', (e) => {
+            touchStart = e.touches[0].clientY;
+        }, { passive: true });
+
+        doc.addEventListener('touchend', (e) => {
+            let touchEnd = e.changedTouches[0].clientY;
+            if (touchStart - touchEnd > 30) { 
+                navigateToLogin();
+            }
+        }, { passive: true });
+    }, 500);
+</script>
+""", height=0, width=0)
+
 # ── Password gate ─────────────────────────────────────────────────────────────
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # 1. ANCHOR BOX WRAPPER FOR NATIVE BROWSER SNAPPING
-    st.markdown('<div id="auth-section" style="scroll-snap-align: start !important; min-height: 90vh; padding-top: 10vh;">', unsafe_allow_html=True)
+    # EXPLICIT WINDOW HEIGHT ANCHOR TARGET FOR TRANSITIONS
+    st.markdown('<div id="auth-section" style="min-height: 100vh; padding-top: 15vh; margin-top: 5vh;">', unsafe_allow_html=True)
 
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     with center_col:
@@ -360,7 +323,6 @@ if not st.session_state['authenticated']:
             else:
                 st.error('Incorrect password.')
 
-    # 2. CLOSE THE TARGET CONTAINER 
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
