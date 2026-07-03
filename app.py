@@ -27,7 +27,7 @@ st.markdown("""
             <div class="smoke two"></div>
             <div class="smoke three"></div>
         </div>
-        <div class="load">Loading...</div>
+        <div class="load">Loading Page...</div>
     </div>
 </div>
 
@@ -44,7 +44,7 @@ st.markdown("""
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        animation: smoothFadeOut 3.5s forwards !important; /* This handles the fade-out */
+        animation: smoothFadeOut 4.5s forwards !important; /* This handles the fade-out */
         pointer-events: none !important;
     }
 
@@ -191,17 +191,154 @@ if not st.session_state['authenticated']:
                 
                 # Display a full-screen overlay with a decryption animation
                 st.markdown("""
-                    <div style="
-                        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                        background: radial-gradient(circle, #1a2a6c, #b21f1f, #fdbb2d); z-index: 999999;
-                        display: flex; flex-direction: column; justify-content: center; align-items: center;
-                        color: white; font-family: sans-serif;">
-                        <div style="font-size: 50px; margin-bottom: 20px; animation: pulse 1.5s infinite;">🔒</div>
-                        <h2>Decrypting & Accessing Secure Database...</h2>
+                <div id="initial-page-overlay">
+                    <div class="loader">
+                        <div class="cup">
+                            <div class="cup-handle"></div>
+                            <div class="smoke one"></div>
+                            <div class="smoke two"></div>
+                            <div class="smoke three"></div>
+                        </div>
+                        <div class="load">Authenticating...</div>
                     </div>
-                    <style>
-                        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-                    </style>
+                </div>
+
+                <style>
+                    /* 1. START WITH A SOLID BACKGROUND (No transparency here) */
+                    #initial-page-overlay {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        background: #111111 !important; /* Change to #ffffff if you want a white screen */
+                        z-index: 9999999 !important; 
+                        display: flex !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        animation: smoothFadeOut 4.5s forwards !important; /* This handles the fade-out */
+                        pointer-events: none !important;
+                    }
+
+                    .loader {
+                        width: 100px;
+                        height: 100px;
+                        position: relative;
+                        animation: shake 3s infinite ease-in-out;
+                    }
+
+                    .cup {
+                        position: absolute;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 40px;
+                        height: 30px;
+                        background-color: #5b4022cb;
+                        border: 1px solid #2e2e2e;
+                        border-radius: 3px 3px 10px 10px;
+                        z-index: 1;
+                        animation: cupPulse 6s infinite ease-in-out;
+                    }
+
+                    .cup::before {
+                        content: "";
+                        position: absolute;
+                        bottom: -5px;
+                        width: calc(100% - 2px);
+                        height: 6px;
+                        background: #5b4022cb;
+                        border: 1px solid #2e2e2e;
+                        border-top: none;
+                        border-radius: 50%;
+                        z-index: -1;
+                        animation: cupPulse 6s infinite ease-in-out;
+                    }
+
+                    .cup::after {
+                        content: "";
+                        position: absolute;
+                        top: -2px;
+                        left: 1px;
+                        width: calc(100% - 2px);
+                        height: 4px;
+                        background: #da8920ca;
+                        border: 1px solid #2e2e2e;
+                        border-radius: 50%;
+                        animation: coffeeGlow 6s infinite ease-in-out;
+                    }
+
+                    .cup-handle {
+                        position: absolute;
+                        top: 5px;
+                        right: -10px;
+                        width: 10px;
+                        height: 15px;
+                        border: 2px solid #2e2e2e;
+                        border-left: none;
+                        border-radius: 0 10px 10px 0;
+                        background: transparent;
+                    }
+
+                    .smoke {
+                        position: absolute;
+                        bottom: 100%;
+                        left: 50%;
+                        width: 10px;
+                        height: 25px;
+                        background: rgba(220, 220, 220, 0.6); 
+                        border-radius: 50%;
+                        transform: translateX(-50%);
+                        animation: rise 3s infinite ease-in-out;
+                        filter: blur(5px); 
+                    }
+
+                    .smoke.one { animation-delay: 0s; }
+                    .smoke.two { animation-delay: 0.8s; }
+                    .smoke.three { animation-delay: 1.6s; }
+
+                    .load {
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 12px;
+                        color: #ffffff; /* Change to #333333 if using a white background */
+                        opacity: 0.8;
+                    }
+
+                    @keyframes rise {
+                        0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+                        30% { opacity: 0.7; }
+                        60% { opacity: 0.4; }
+                        100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
+                    }
+
+                    @keyframes shake {
+                        0% { transform: translateX(0) translateY(0) rotate(0); }
+                        25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
+                        50% { transform: translateX(0) translateY(0) rotate(0); }
+                        75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
+                        100% { transform: translateX(0) translateY(0) rotate(0); }
+                    }
+
+                    @keyframes cupPulse {
+                        0%, 100% { background-color: #5b4022cb; }
+                        50% { background-color: #f5f5f5bd; }
+                    }
+
+                    @keyframes coffeeGlow {
+                        0%, 100% { background: #da8920ca; }
+                        50% { background: #fed197d5; }
+                    }
+
+                    /* 2. THE BACKGROUND TRANSFORMS TO TRANSPARENT ONLY AT THE VERY END */
+                    @keyframes smoothFadeOut {
+                        0% { opacity: 1; visibility: visible; }
+                        80% { opacity: 1; visibility: visible; }
+                        100% { opacity: 0; visibility: hidden; display: none; }
+                    }
+                </style>
                 """, unsafe_allow_html=True)
                 time.sleep(1.5)
                 
@@ -319,19 +456,155 @@ with st.sidebar:
         st.session_state['previous_buyer'] = selected_buyer
 
     if st.session_state['previous_buyer'] != selected_buyer:
-        st.markdown(f"""
-            <div style="
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(255, 255, 255, 0.95); z-index: 99999;
-                display: flex; flex-direction: column; justify-content: center; align-items: center;
-                font-family: Arial, sans-serif;">
-                <div style="width: 60px; height: 60px; border: 5px solid #ccc; border-bottom-color: #ff7f50; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-                <h2 style="color: #333; margin-top: 20px;">Fetching metrics for <b>{selected_buyer}</b>...</h2>
-                <p style="color: #777;">Recalculating forecast models and charting records</p>
+        st.markdown("""
+        <div id="initial-page-overlay">
+            <div class="loader">
+                <div class="cup">
+                    <div class="cup-handle"></div>
+                    <div class="smoke one"></div>
+                    <div class="smoke two"></div>
+                    <div class="smoke three"></div>
+                </div>
+                <div class="load">Generating Report...</div>
             </div>
-            <style>
-                @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
-            </style>
+        </div>
+
+        <style>
+            /* 1. START WITH A SOLID BACKGROUND (No transparency here) */
+            #initial-page-overlay {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: #111111 !important; /* Change to #ffffff if you want a white screen */
+                z-index: 9999999 !important; 
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                animation: smoothFadeOut 4.5s forwards !important; /* This handles the fade-out */
+                pointer-events: none !important;
+            }
+
+            .loader {
+                width: 100px;
+                height: 100px;
+                position: relative;
+                animation: shake 3s infinite ease-in-out;
+            }
+
+            .cup {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 40px;
+                height: 30px;
+                background-color: #5b4022cb;
+                border: 1px solid #2e2e2e;
+                border-radius: 3px 3px 10px 10px;
+                z-index: 1;
+                animation: cupPulse 6s infinite ease-in-out;
+            }
+
+            .cup::before {
+                content: "";
+                position: absolute;
+                bottom: -5px;
+                width: calc(100% - 2px);
+                height: 6px;
+                background: #5b4022cb;
+                border: 1px solid #2e2e2e;
+                border-top: none;
+                border-radius: 50%;
+                z-index: -1;
+                animation: cupPulse 6s infinite ease-in-out;
+            }
+
+            .cup::after {
+                content: "";
+                position: absolute;
+                top: -2px;
+                left: 1px;
+                width: calc(100% - 2px);
+                height: 4px;
+                background: #da8920ca;
+                border: 1px solid #2e2e2e;
+                border-radius: 50%;
+                animation: coffeeGlow 6s infinite ease-in-out;
+            }
+
+            .cup-handle {
+                position: absolute;
+                top: 5px;
+                right: -10px;
+                width: 10px;
+                height: 15px;
+                border: 2px solid #2e2e2e;
+                border-left: none;
+                border-radius: 0 10px 10px 0;
+                background: transparent;
+            }
+
+            .smoke {
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                width: 10px;
+                height: 25px;
+                background: rgba(220, 220, 220, 0.6); 
+                border-radius: 50%;
+                transform: translateX(-50%);
+                animation: rise 3s infinite ease-in-out;
+                filter: blur(5px); 
+            }
+
+            .smoke.one { animation-delay: 0s; }
+            .smoke.two { animation-delay: 0.8s; }
+            .smoke.three { animation-delay: 1.6s; }
+
+            .load {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 12px;
+                color: #ffffff; /* Change to #333333 if using a white background */
+                opacity: 0.8;
+            }
+
+            @keyframes rise {
+                0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+                30% { opacity: 0.7; }
+                60% { opacity: 0.4; }
+                100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
+            }
+
+            @keyframes shake {
+                0% { transform: translateX(0) translateY(0) rotate(0); }
+                25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
+                50% { transform: translateX(0) translateY(0) rotate(0); }
+                75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
+                100% { transform: translateX(0) translateY(0) rotate(0); }
+            }
+
+            @keyframes cupPulse {
+                0%, 100% { background-color: #5b4022cb; }
+                50% { background-color: #f5f5f5bd; }
+            }
+
+            @keyframes coffeeGlow {
+                0%, 100% { background: #da8920ca; }
+                50% { background: #fed197d5; }
+            }
+
+            /* 2. THE BACKGROUND TRANSFORMS TO TRANSPARENT ONLY AT THE VERY END */
+            @keyframes smoothFadeOut {
+                0% { opacity: 1; visibility: visible; }
+                80% { opacity: 1; visibility: visible; }
+                100% { opacity: 0; visibility: hidden; display: none; }
+            }
+        </style>
         """, unsafe_allow_html=True)
         st.session_state['previous_buyer'] = selected_buyer
         time.sleep(1.2) # Yields execution to let browser show CSS before layout update
