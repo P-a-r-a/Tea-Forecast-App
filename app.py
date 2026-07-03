@@ -20,15 +20,14 @@ st.set_page_config(
 # ── Initial splash screen overlay ─────────────────────────────────────────────────────
 
 
-# ── Password gate ─────────────────────────────────────────────────────────────
 # Initialize authentication state
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # ── COMBINED WRAPPER FOR OVERLAY & AUTH FORM ─────────────────────────────
+    # ── UNIFIED WRAPPER (SPLASH + AUTH FORM) ──────────────────────────────────
     st.markdown("""
-    <!-- 1. THE REVEALABLE SPLASH LAYER -->
+    <!-- 1. THE SLIDE-UP OVERLAY LAYER -->
     <div id="splash-layer">
         <div class="splash-content">
             <h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
@@ -44,14 +43,16 @@ if not st.session_state['authenticated']:
         </div>
     </div>
                 
-    <!-- INTERACTION INJECTOR -->
     <script>
         const doc = window.parent.document;
         
         function dismissSplash() {
             const splash = doc.getElementById('splash-layer');
-            if (splash) {
+            if (splash && !splash.classList.contains('dismissed')) {
                 splash.classList.add('dismissed');
+                // Restore standard scrolling inside the main wrapper framework
+                const container = doc.querySelector('.main') || doc.querySelector('[data-testid="stAppViewMain"]');
+                if (container) container.style.overflowY = "auto";
             }
         }
 
@@ -60,16 +61,15 @@ if not st.session_state['authenticated']:
             const mainAppWindow = doc.querySelector('.main') || doc.querySelector('[data-testid="stAppViewMain"]') || window.parent;
             
             if (splash) {
-                // Dismiss on direct tap/click
                 splash.onclick = dismissSplash;
             }
 
-            // Dismiss on Scroll Wheel down
+            // Intercept initial scroll down to trigger the slide up animation
             mainAppWindow.addEventListener('wheel', (e) => {
-                if (e.deltaY > 5) dismissSplash();
+                if (e.deltaY > 2) dismissSplash();
             }, { passive: true });
 
-            // Dismiss on Mobile Touch Swipe Up
+            // Intercept mobile swipe up
             let touchStart = 0;
             doc.addEventListener('touchstart', (e) => {
                 touchStart = e.touches[0].clientY;
@@ -77,7 +77,7 @@ if not st.session_state['authenticated']:
 
             doc.addEventListener('touchend', (e) => {
                 let touchEnd = e.changedTouches[0].clientY;
-                if (touchStart - touchEnd > 30) { 
+                if (touchStart - touchEnd > 15) { 
                     dismissSplash();
                 }
             }, { passive: true });
@@ -85,31 +85,35 @@ if not st.session_state['authenticated']:
     </script>
 
     <style>
-        /* Force Streamlit app view container to hide outer bounds cleanly during shifts */
-        [data-testid="stAppViewBlockContainer"] {
-            position: relative !important;
-            overflow: hidden !important;
+        /* Target the true main app frame to allow native handling */
+        .main, [data-testid="stAppViewMain"] {
+            overflow-y: hidden !important; /* Locks scrolling until splash is dismissed */
         }
 
-        /* Splash Layer covering the exact view deck area */
+        [data-testid="stAppViewBlockContainer"] {
+            position: relative !important;
+            padding-top: 0px !important;
+        }
+
+        /* Absolutely positioned layer over the main app container canvas */
         #splash-layer {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
+            width: 100%;
             height: 100vh;
             background: #111111;
             color: #ffffff;
-            z-index: 999999;
+            z-index: 99999;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Helvetica Neue', Arial, sans-serif;
-            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
             transform: translateY(0);
         }
 
-        /* Slide up off-screen animation class */
+        /* Slide up out of view profile */
         #splash-layer.dismissed {
             transform: translateY(-100vh);
             opacity: 0;
@@ -132,12 +136,7 @@ if not st.session_state['authenticated']:
             margin: 0 !important;
         }
 
-        .loader-cup {
-            width: 60px;
-            height: 50px;
-            position: relative;
-        }
-
+        .loader-cup { width: 60px; height: 50px; position: relative; }
         .cup {
             position: absolute;
             bottom: 10px;
@@ -161,13 +160,7 @@ if not st.session_state['authenticated']:
             border-radius: 0 10px 10px 0;
         }
 
-        .scroll-prompt {
-            font-size: 1rem;
-            letter-spacing: 1px;
-            opacity: 0.8;
-            animation: bounce 2s infinite;
-        }
-
+        .scroll-prompt { font-size: 1rem; letter-spacing: 1px; opacity: 0.8; animation: bounce 2s infinite; }
         .mobile-text { display: none; }
         .desktop-text { display: block; }
 
@@ -185,179 +178,171 @@ if not st.session_state['authenticated']:
     </style>
     """, unsafe_allow_html=True)
 
-    # ── 2. THE AUTHENTICATION FORM BELOW ─────────────────────────────────────
-    # This sits naturally on the page canvas layout beneath the global splash view wrapper
-st.markdown('<div style="margin-top: 25vh; min-height: 70vh;">', unsafe_allow_html=True)
+    # ── 2. THE SECURITY GATEWAY LAYOUT ────────────────────────────────────────
+    st.markdown('<div style="margin-top: 30vh; min-height: 70vh;">', unsafe_allow_html=True)
 
-pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
-with center_col:
-    st.markdown("<h2 style='text-align: center;'>Secure Access</h2>", unsafe_allow_html=True)
-    with st.form(key='login_form', clear_on_submit=False):
-        password = st.text_input('Enter password', type='password', label_visibility='collapsed')
-        btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
-        with btn_col:
-            submit_button = st.form_submit_button(label='Login', width='stretch')
-            
-    if submit_button:
-        if password == st.secrets['APP_PASSWORD']:
-            st.session_state['authenticated'] = True
-            
-            # Render the post-authentication loading coffee cup animation overlay
-            st.markdown("""
-            <div id="auth-success-overlay">
-                <div class="success-loader">
-                    <div class="auth-cup">
-                        <div class="auth-cup-handle"></div>
-                        <div class="smoke one"></div>
-                        <div class="smoke two"></div>
-                        <div class="smoke three"></div>
+    pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
+    with center_col:
+        st.markdown("<h2 style='text-align: center;'>Secure Access</h2>", unsafe_allow_html=True)
+        with st.form(key='login_form', clear_on_submit=False):
+            password = st.text_input('Enter password', type='password', label_visibility='collapsed')
+            btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
+            with btn_col:
+                submit_button = st.form_submit_button(label='Login', width='stretch')
+                
+        if submit_button:
+            if password == st.secrets['APP_PASSWORD']:
+                st.session_state['authenticated'] = True
+                
+                # Render post-authentication loading coffee animation overlay
+                st.markdown("""
+                <div id="auth-success-overlay">
+                    <div class="success-loader">
+                        <div class="auth-cup">
+                            <div class="auth-cup-handle"></div>
+                            <div class="smoke one"></div>
+                            <div class="smoke two"></div>
+                            <div class="smoke three"></div>
+                        </div>
+                        <div class="load-text">Authenticating...</div>
                     </div>
-                    <div class="load-text">Authenticating...</div>
                 </div>
-            </div>
 
-            <style>
-                #auth-success-overlay {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    background: #111111 !important;
-                    z-index: 9999999 !important; 
-                    display: flex !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                    animation: smoothFadeOut 4.5s forwards !important;
-                    pointer-events: none !important;
-                }
+                <style>
+                    #auth-success-overlay {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        background: #111111 !important;
+                        z-index: 9999999 !important; 
+                        display: flex !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        pointer-events: none !important;
+                    }
 
-                .success-loader {
-                    width: 200px;
-                    height: 100px;
-                    position: relative;
-                    animation: shake 3s infinite ease-in-out;
-                }
+                    .success-loader {
+                        width: 200px;
+                        height: 100px;
+                        position: relative;
+                        animation: shake 3s infinite ease-in-out;
+                    }
 
-                .auth-cup {
-                    position: absolute;
-                    bottom: 20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 40px;
-                    height: 30px;
-                    background-color: #5b4022cb;
-                    border: 1px solid #2e2e2e;
-                    border-radius: 3px 3px 10px 10px;
-                    z-index: 1;
-                    animation: cupPulse 6s infinite ease-in-out;
-                }
+                    .auth-cup {
+                        position: absolute;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 40px;
+                        height: 30px;
+                        background-color: #5b4022cb;
+                        border: 1px solid #2e2e2e;
+                        border-radius: 3px 3px 10px 10px;
+                        z-index: 1;
+                        animation: cupPulse 6s infinite ease-in-out;
+                    }
 
-                .auth-cup::before {
-                    content: "";
-                    position: absolute;
-                    bottom: -5px;
-                    width: calc(100% - 2px);
-                    height: 6px;
-                    background: #5b4022cb;
-                    border: 1px solid #2e2e2e;
-                    border-top: none;
-                    border-radius: 50%;
-                    z-index: -1;
-                    animation: cupPulse 6s infinite ease-in-out;
-                }
+                    .auth-cup::before {
+                        content: "";
+                        position: absolute;
+                        bottom: -5px;
+                        width: calc(100% - 2px);
+                        height: 6px;
+                        background: #5b4022cb;
+                        border: 1px solid #2e2e2e;
+                        border-top: none;
+                        border-radius: 50%;
+                        z-index: -1;
+                        animation: cupPulse 6s infinite ease-in-out;
+                    }
 
-                .auth-cup::after {
-                    content: "";
-                    position: absolute;
-                    top: -2px;
-                    left: 1px;
-                    width: calc(100% - 2px);
-                    height: 4px;
-                    background: #da8920ca;
-                    border: 1px solid #2e2e2e;
-                    border-radius: 50%;
-                    animation: coffeeGlow 6s infinite ease-in-out;
-                }
+                    .auth-cup::after {
+                        content: "";
+                        position: absolute;
+                        top: -2px;
+                        left: 1px;
+                        width: calc(100% - 2px);
+                        height: 4px;
+                        background: #da8920ca;
+                        border: 1px solid #2e2e2e;
+                        border-radius: 50%;
+                        animation: coffeeGlow 6s infinite ease-in-out;
+                    }
 
-                .auth-cup-handle {
-                    position: absolute;
-                    top: 5px;
-                    right: -10px;
-                    width: 10px;
-                    height: 15px;
-                    border: 2px solid #2e2e2e;
-                    border-left: none;
-                    border-radius: 0 10px 10px 0;
-                    background: transparent;
-                }
+                    .auth-cup-handle {
+                        position: absolute;
+                        top: 5px;
+                        right: -10px;
+                        width: 10px;
+                        height: 15px;
+                        border: 2px solid #2e2e2e;
+                        border-left: none;
+                        border-radius: 0 10px 10px 0;
+                        background: transparent;
+                    }
 
-                .smoke {
-                    position: absolute;
-                    bottom: 100%;
-                    left: 50%;
-                    width: 10px;
-                    height: 25px;
-                    background: rgba(220, 220, 220, 0.6); 
-                    border-radius: 50%;
-                    transform: translateX(-50%);
-                    animation: rise 3s infinite ease-in-out;
-                    filter: blur(5px); 
-                }
+                    .smoke {
+                        position: absolute;
+                        bottom: 100%;
+                        left: 50%;
+                        width: 10px;
+                        height: 25px;
+                        background: rgba(220, 220, 220, 0.6); 
+                        border-radius: 50%;
+                        transform: translateX(-50%);
+                        animation: rise 3s infinite ease-in-out;
+                        filter: blur(5px); 
+                    }
 
-                .smoke.one { animation-delay: 0s; }
-                .smoke.two { animation-delay: 0.8s; }
-                .smoke.three { animation-delay: 1.6s; }
+                    .smoke.one { animation-delay: 0s; }
+                    .smoke.two { animation-delay: 0.8s; }
+                    .smoke.three { animation-delay: 1.6s; }
 
-                .load-text {
-                    position: absolute;
-                    bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    font-size: 12px;
-                    color: #ffffff;
-                    opacity: 0.8;
-                }
+                    .load-text {
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 12px;
+                        color: #ffffff;
+                        opacity: 0.8;
+                    }
 
-                @keyframes rise {
-                    0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
-                    30% { opacity: 0.7; }
-                    60% { opacity: 0.4; }
-                    100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
-                }
+                    @keyframes rise {
+                        0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+                        30% { opacity: 0.7; }
+                        60% { opacity: 0.4; }
+                        100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
+                    }
 
-                @keyframes shake {
-                    0% { transform: translateX(0) translateY(0) rotate(0); }
-                    25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
-                    50% { transform: translateX(0) translateY(0) rotate(0); }
-                    75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
-                    100% { transform: translateX(0) translateY(0) rotate(0); }
-                }
+                    @keyframes shake {
+                        0% { transform: translateX(0) translateY(0) rotate(0); }
+                        25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
+                        50% { transform: translateX(0) translateY(0) rotate(0); }
+                        75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
+                        100% { transform: translateX(0) translateY(0) rotate(0); }
+                    }
 
-                @keyframes cupPulse {
-                    0%, 100% { background-color: #5b4022cb; }
-                    50% { background-color: #f5f5f5bd; }
-                }
+                    @keyframes cupPulse {
+                        0%, 100% { background-color: #5b4022cb; }
+                        50% { background-color: #f5f5f5bd; }
+                    }
 
-                @keyframes coffeeGlow {
-                    0%, 100% { background: #da8920ca; }
-                    50% { background: #fed197d5; }
-                }
-
-                @keyframes smoothFadeOut {
-                    0% { opacity: 1; visibility: visible; }
-                    80% { opacity: 1; visibility: visible; }
-                    100% { opacity: 0; visibility: hidden; display: none; }
-                }
-            </style>
-            """, unsafe_allow_html=True)
-            time.sleep(1.5)
-            st.rerun()
-        else:
-            st.error('Incorrect password.')
-            
-st.markdown('</div>', unsafe_allow_html=True)
-st.stop()
+                    @keyframes coffeeGlow {
+                        0%, 100% { background: #da8920ca; }
+                        50% { background: #fed197d5; }
+                    }
+                </style>
+                """, unsafe_allow_html=True)
+                time.sleep(1.5)
+                st.rerun()
+            else:
+                st.error('Incorrect password.')
+                
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data
