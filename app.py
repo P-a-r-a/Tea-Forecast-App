@@ -18,41 +18,28 @@ st.set_page_config(
     initial_sidebar_state='expanded'
 )
 
-# ── Initial splash screen overlay ─────────────────────────────────────────────────────
-
 # ── Password gate ─────────────────────────────────────────────────────────────
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-
-    # ── Auth form (rendered first, sits beneath the splash visually) ──────────
-    st.markdown(
-        '<div style="margin-top:25vh; min-height:70vh;">',
-        unsafe_allow_html=True
-    )
+    # Clean spacing for the centered login form container
+    st.markdown('<div style="margin-top: 30vh; min-height: 70vh;">', unsafe_allow_html=True)
 
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     with center_col:
-        st.markdown(
-            "<h2 style='text-align:center;'>Secure Access</h2>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<h2 style='text-align: center;'>Secure Access</h2>", unsafe_allow_html=True)
         with st.form(key='login_form', clear_on_submit=False):
-            password = st.text_input(
-                'Enter password', type='password',
-                label_visibility='collapsed'
-            )
+            password = st.text_input('Enter password', type='password', label_visibility='collapsed')
             btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
             with btn_col:
-                submit_button = st.form_submit_button(
-                    label='Login', use_container_width=True
-                )
-
+                submit_button = st.form_submit_button(label='Login', width='stretch')
+                
         if submit_button:
             if password == st.secrets['APP_PASSWORD']:
                 st.session_state['authenticated'] = True
-                # Brief loading overlay rendered after successful auth
+                
+                # Render post-authentication loading coffee animation overlay
                 st.markdown("""
                 <div id="auth-success-overlay">
                     <div class="success-loader">
@@ -65,62 +52,132 @@ if not st.session_state['authenticated']:
                         <div class="load-text">Authenticating...</div>
                     </div>
                 </div>
+
                 <style>
                     #auth-success-overlay {
-                        position: fixed;
-                        top: 0; left: 0;
-                        width: 100vw; height: 100vh;
-                        background: #111111;
-                        z-index: 9999999;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        animation: smoothFadeOut 3s forwards;
-                        pointer-events: none;
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        background: #111111 !important;
+                        z-index: 9999999 !important; 
+                        display: flex !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        pointer-events: none !important;
                     }
-                    .success-loader { width:200px; height:100px; position:relative; }
+
+                    .success-loader {
+                        width: 200px;
+                        height: 100px;
+                        position: relative;
+                        animation: shake 3s infinite ease-in-out;
+                    }
+
                     .auth-cup {
-                        position:absolute; bottom:20px; left:50%;
-                        transform:translateX(-50%);
-                        width:40px; height:30px;
-                        background:#5b4022cb;
-                        border:1px solid #2e2e2e;
-                        border-radius:3px 3px 10px 10px;
+                        position: absolute;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 40px;
+                        height: 30px;
+                        background-color: #5b4022cb;
+                        border: 1px solid #2e2e2e;
+                        border-radius: 3px 3px 10px 10px;
+                        z-index: 1;
+                        animation: cupPulse 6s infinite ease-in-out;
                     }
+
+                    .auth-cup::before {
+                        content: "";
+                        position: absolute;
+                        bottom: -5px;
+                        width: calc(100% - 2px);
+                        height: 6px;
+                        background: #5b4022cb;
+                        border: 1px solid #2e2e2e;
+                        border-top: none;
+                        border-radius: 50%;
+                        z-index: -1;
+                        animation: cupPulse 6s infinite ease-in-out;
+                    }
+
+                    .auth-cup::after {
+                        content: "";
+                        position: absolute;
+                        top: -2px;
+                        left: 1px;
+                        width: calc(100% - 2px);
+                        height: 4px;
+                        background: #da8920ca;
+                        border: 1px solid #2e2e2e;
+                        border-radius: 50%;
+                        animation: coffeeGlow 6s infinite ease-in-out;
+                    }
+
                     .auth-cup-handle {
-                        position:absolute; top:5px; right:-10px;
-                        width:10px; height:15px;
-                        border:2px solid #2e2e2e;
-                        border-left:none;
-                        border-radius:0 10px 10px 0;
+                        position: absolute;
+                        top: 5px;
+                        right: -10px;
+                        width: 10px;
+                        height: 15px;
+                        border: 2px solid #2e2e2e;
+                        border-left: none;
+                        border-radius: 0 10px 10px 0;
+                        background: transparent;
                     }
+
                     .smoke {
-                        position:absolute; bottom:100%; left:50%;
-                        width:10px; height:25px;
-                        background:rgba(220,220,220,0.6);
-                        border-radius:50%;
-                        transform:translateX(-50%);
-                        animation:rise 3s infinite ease-in-out;
-                        filter:blur(5px);
+                        position: absolute;
+                        bottom: 100%;
+                        left: 50%;
+                        width: 10px;
+                        height: 25px;
+                        background: rgba(220, 220, 220, 0.6); 
+                        border-radius: 50%;
+                        transform: translateX(-50%);
+                        animation: rise 3s infinite ease-in-out;
+                        filter: blur(5px); 
                     }
-                    .smoke.one { animation-delay:0s; }
-                    .smoke.two { animation-delay:0.8s; }
-                    .smoke.three { animation-delay:1.6s; }
+
+                    .smoke.one { animation-delay: 0s; }
+                    .smoke.two { animation-delay: 0.8s; }
+                    .smoke.three { animation-delay: 1.6s; }
+
                     .load-text {
-                        position:absolute; bottom:0; left:50%;
-                        transform:translateX(-50%);
-                        font-size:12px; color:#ffffff; opacity:0.8;
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 12px;
+                        color: #ffffff;
+                        opacity: 0.8;
                     }
+
                     @keyframes rise {
-                        0%   { transform:translate(-50%,0) scale(0.4); opacity:0; }
-                        30%  { opacity:0.7; }
-                        60%  { opacity:0.4; }
-                        100% { transform:translate(-50%,-120px) scale(1); opacity:0; }
+                        0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+                        30% { opacity: 0.7; }
+                        60% { opacity: 0.4; }
+                        100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
                     }
-                    @keyframes smoothFadeOut {
-                        0%   { opacity:1; visibility:visible; }
-                        80%  { opacity:1; visibility:visible; }
-                        100% { opacity:0; visibility:hidden; }
+
+                    @keyframes shake {
+                        0% { transform: translateX(0) translateY(0) rotate(0); }
+                        25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
+                        50% { transform: translateX(0) translateY(0) rotate(0); }
+                        75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
+                        100% { transform: translateX(0) translateY(0) rotate(0); }
+                    }
+
+                    @keyframes cupPulse {
+                        0%, 100% { background-color: #5b4022cb; }
+                        50% { background-color: #f5f5f5bd; }
+                    }
+
+                    @keyframes coffeeGlow {
+                        0%, 100% { background: #da8920ca; }
+                        50% { background: #fed197d5; }
                     }
                 </style>
                 """, unsafe_allow_html=True)
@@ -128,186 +185,8 @@ if not st.session_state['authenticated']:
                 st.rerun()
             else:
                 st.error('Incorrect password.')
-
+                
     st.markdown('</div>', unsafe_allow_html=True)
-
-    # ── Splash screen rendered on top via components.html ─────────────────────
-    # components.html() runs in its own iframe with full JS support.
-    # It covers the Streamlit page visually and dismisses on scroll/swipe/click,
-    # revealing the auth form underneath without any Python involvement.
-    components.html("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-
-        body {
-            background: transparent;
-            overflow: hidden;
-        }
-
-        #splash {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: #111111;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            color: #ffffff;
-            transition: transform 0.85s cubic-bezier(0.77,0,0.175,1),
-                        opacity 0.85s ease;
-            z-index: 9999;
-            cursor: pointer;
-        }
-
-        #splash.dismissed {
-            transform: translateY(-100vh);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .splash-title {
-            font-size: 2.2rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-            text-align: center;
-            padding: 0 20px;
-        }
-
-        .cup-wrap { width:60px; height:55px; position:relative; }
-
-        .cup {
-            position: absolute;
-            bottom: 8px; left: 50%;
-            transform: translateX(-50%);
-            width: 50px; height: 38px;
-            background: #5b4022cb;
-            border: 2px solid #ffffff;
-            border-radius: 3px 3px 12px 12px;
-        }
-
-        .cup-handle {
-            position: absolute;
-            top: 6px; right: -13px;
-            width: 13px; height: 18px;
-            border: 2px solid #ffffff;
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-        }
-
-        .smoke-wrap {
-            position: absolute;
-            bottom: 100%; left: 50%;
-            transform: translateX(-50%);
-            width: 40px; height: 30px;
-        }
-
-        .s {
-            position: absolute;
-            bottom: 0;
-            width: 8px; height: 20px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 50%;
-            filter: blur(4px);
-            animation: rise 2.5s infinite ease-in-out;
-        }
-        .s1 { left: 8px;  animation-delay: 0s; }
-        .s2 { left: 16px; animation-delay: 0.7s; }
-        .s3 { left: 24px; animation-delay: 1.4s; }
-
-        @keyframes rise {
-            0%   { transform: translateY(0) scale(0.5); opacity: 0; }
-            30%  { opacity: 0.8; }
-            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
-        }
-
-        .prompt {
-            font-size: 0.95rem;
-            letter-spacing: 1px;
-            opacity: 0.75;
-            animation: bob 2s infinite;
-            text-align: center;
-        }
-
-        .mobile { display: none; }
-        .desktop { display: block; }
-
-        @media (max-width: 768px) {
-            .splash-title { font-size: 1.6rem; }
-            .mobile  { display: block; }
-            .desktop { display: none; }
-        }
-
-        @keyframes bob {
-            0%,100% { transform: translateY(0); }
-            50%      { transform: translateY(-6px); }
-        }
-    </style>
-    </head>
-    <body>
-
-    <div id="splash">
-        <div class="splash-title">♨️ Specialty Tea Buyer Forecast</div>
-
-        <div class="cup-wrap">
-            <div class="smoke-wrap">
-                <div class="s s1"></div>
-                <div class="s s2"></div>
-                <div class="s s3"></div>
-            </div>
-            <div class="cup">
-                <div class="cup-handle"></div>
-            </div>
-        </div>
-
-        <div class="prompt">
-            <p class="desktop">Scroll down to enter &darr;</p>
-            <p class="mobile">Swipe up to enter &uarr;</p>
-        </div>
-    </div>
-
-    <script>
-        const splash = document.getElementById('splash');
-
-        function dismiss() {
-            splash.classList.add('dismissed');
-        }
-
-        // Click or tap
-        splash.addEventListener('click', dismiss);
-
-        // Scroll wheel (desktop)
-        window.addEventListener('wheel', function(e) {
-            if (e.deltaY > 5) dismiss();
-        }, { passive: true });
-
-        // Touch swipe up (mobile)
-        let touchStartY = 0;
-        window.addEventListener('touchstart', function(e) {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener('touchend', function(e) {
-            const touchEndY = e.changedTouches[0].clientY;
-            if (touchStartY - touchEndY > 30) dismiss();
-        }, { passive: true });
-
-        // Keyboard — any key also dismisses
-        window.addEventListener('keydown', dismiss);
-    </script>
-
-    </body>
-    </html>
-    """,
-    height=0,    # height=0 so it takes no layout space
-    scrolling=False
-    )
-
     st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
