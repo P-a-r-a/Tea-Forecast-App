@@ -6,3 +6,5 @@ joblib
 xgboost
 scikit-learn
 plotly
+fpdf2
+kaleido
