@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from fpdf import FPDF
 import tempfile
+import urllib.request
 import os
 import io
 
@@ -58,26 +59,40 @@ ALL_MONTHS  = pd.DataFrame({
 })
 
 # ── PDF generation helper ─────────────────────────────────────────────────────
+def get_fonts():
+    """Download Noto Sans fonts once per session and cache to /tmp."""
+    regular_path = '/tmp/NotoSans-Regular.ttf'
+    bold_path    = '/tmp/NotoSans-Bold.ttf'
+
+    if not os.path.exists(regular_path):
+        urllib.request.urlretrieve(
+            'https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf',
+            regular_path
+        )
+    if not os.path.exists(bold_path):
+        urllib.request.urlretrieve(
+            'https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Bold.ttf',
+            bold_path
+        )
+    return regular_path, bold_path
+
+
 def build_pdf(title, chart_fig, tables: dict) -> bytes:
+    font_regular, font_bold = get_fonts()
+
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
-    # Use DejaVu — bundled with fpdf2, supports full Unicode
-    # This handles all special characters in buyer names
-    pdf.add_font('DejaVu', '',
-                 '/home/adminuser/venv/lib/python3.14/site-packages/fpdf/fonts/DejaVuSans.ttf',
-                 uni=True)
-    pdf.add_font('DejaVu', 'B',
-                 '/home/adminuser/venv/lib/python3.14/site-packages/fpdf/fonts/DejaVuSans-Bold.ttf',
-                 uni=True)
+    pdf.add_font('Noto', '',  font_regular, uni=True)
+    pdf.add_font('Noto', 'B', font_bold,    uni=True)
 
     # Title
-    pdf.set_font('DejaVu', 'B', 16)
+    pdf.set_font('Noto', 'B', 16)
     pdf.cell(0, 10, title, ln=True, align='C')
     pdf.ln(4)
 
-    # Export chart to temporary PNG
+    # Chart image
     with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
         tmp_path = tmp.name
 
@@ -88,22 +103,22 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
 
     # Tables
     for table_title, df in tables.items():
-        pdf.set_font('DejaVu', 'B', 12)
+        pdf.set_font('Noto', 'B', 12)
         pdf.cell(0, 8, table_title, ln=True)
         pdf.ln(2)
 
         col_count = len(df.columns)
         col_width = 190 / col_count
 
-        # Header row
-        pdf.set_font('DejaVu', 'B', 9)
+        # Header
+        pdf.set_font('Noto', 'B', 9)
         pdf.set_fill_color(220, 230, 241)
         for col in df.columns:
             pdf.cell(col_width, 7, str(col), border=1, fill=True)
         pdf.ln()
 
-        # Data rows
-        pdf.set_font('DejaVu', '', 9)
+        # Rows
+        pdf.set_font('Noto', '', 9)
         for _, row in df.iterrows():
             for val in row:
                 pdf.cell(col_width, 6, str(val), border=1)
