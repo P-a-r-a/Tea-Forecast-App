@@ -20,138 +20,116 @@ st.set_page_config(
 # ── Initial splash screen overlay ─────────────────────────────────────────────────────
 st.markdown("""
 <div id="splash-screen-overlay">
-    <div class="splash-content">
-        <!-- Title topic for the page -->
-        <h1 class="splash-title">Specialty Tea Buyer Forecast</h1>
-        
-        <!-- The Static Cup (Animations removed) -->
-        <div class="loader">
-            <div class="cup">
-                <div class="cup-handle"></div>
-            </div>
-        </div>
-        
-        <!-- Navigation Indicator text -->
-        <div class="scroll-prompt">
-            <p class="desktop-text">Scroll down to get started ↓</p>
-            <p class="mobile-text">Swipe up to get started ↑</p>
-        </div>
-    </div>
+<div class="splash-content">
+<h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
+<div class="loader">
+<div class="cup">
+<div class="cup-handle"></div>
 </div>
-
+</div>
+<div class="scroll-prompt">
+<p class="desktop-text">Scroll down to get started ↓</p>
+<p class="mobile-text">Swipe up to get started ↑</p>
+</div>
+</div>
+</div>
 <style>
-    /* Full-screen initial view section */
-    #splash-screen-overlay {
-        position: relative;
-        width: 100%;
-        height: 85vh; /* Takes up most of the initial vertical viewport */
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        background: #111111;
-        color: #ffffff;
-        font-family: 'Helvetica Neue', Arial, sans-serif;
-        border-radius: 12px;
-        margin-bottom: 50px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    .splash-content {
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 40px;
-    }
-
-    .splash-title {
-        font-size: 2.5rem !important;
-        font-weight: 300 !important;
-        letter-spacing: 2px;
-        color: #ffffff !important;
-        margin: 0 !important;
-    }
-
-    /* Your Exact Cup Container (Shaking/pulsing removed) */
-    .loader {
-        width: 60px;
-        height: 50px;
-        position: relative;
-    }
-
-    .cup {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 38px;
-        background-color: #5b4022cb;
-        border: 2px solid #ffffff;
-        border-radius: 3px 3px 12px 12px;
-    }
-
-    .cup::before {
-        content: "";
-        position: absolute;
-        bottom: -6px;
-        width: calc(100% - 2px);
-        height: 6px;
-        background: #5b4022cb;
-        border: 2px solid #ffffff;
-        border-top: none;
-        border-radius: 50%;
-    }
-
-    .cup::after {
-        content: "";
-        position: absolute;
-        top: -2px;
-        left: 2px;
-        width: calc(100% - 4px);
-        height: 5px;
-        background: #da8920ca;
-        border-radius: 50%;
-    }
-
-    .cup-handle {
-        position: absolute;
-        top: 6px;
-        right: -12px;
-        width: 12px;
-        height: 18px;
-        border: 2px solid #ffffff;
-        border-left: none;
-        border-radius: 0 10px 10px 0;
-    }
-
-    /* Interactive Scroll text indicator with gentle bounce */
-    .scroll-prompt {
-        font-size: 1rem;
-        letter-spacing: 1px;
-        opacity: 0.8;
-        animation: bounce 2s infinite;
-    }
-
-    .scroll-prompt p {
-        margin: 0 !important;
-    }
-
-    /* Responsive display: Toggle texts conditionally based on screen size */
-    .mobile-text { display: none; }
-    .desktop-text { display: block; }
-
-    @media (max-width: 768px) {
-        .splash-title { font-size: 1.8rem !important; }
-        .mobile-text { display: block; }
-        .desktop-text { display: none; }
-    }
-
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-8px); }
-        60% { transform: translateY(-4px); }
-    }
+#splash-screen-overlay {
+    position: relative;
+    width: 100%;
+    height: 75vh;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: #111111;
+    color: #ffffff;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    border-radius: 12px;
+    margin-bottom: 50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.splash-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+.splash-title {
+    font-size: 2.5rem !important;
+    font-weight: 300 !important;
+    letter-spacing: 2px;
+    color: #ffffff !important;
+    margin: 0 !important;
+}
+.loader {
+    width: 60px;
+    height: 50px;
+    position: relative;
+}
+.cup {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 38px;
+    background-color: #5b4022cb;
+    border: 2px solid #ffffff;
+    border-radius: 3px 3px 12px 12px;
+}
+.cup::before {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    width: calc(100% - 2px);
+    height: 6px;
+    background: #5b4022cb;
+    border: 2px solid #ffffff;
+    border-top: none;
+    border-radius: 50%;
+}
+.cup::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    width: calc(100% - 4px);
+    height: 5px;
+    background: #da8920ca;
+    border-radius: 50%;
+}
+.cup-handle {
+    position: absolute;
+    top: 6px;
+    right: -12px;
+    width: 12px;
+    height: 18px;
+    border: 2px solid #ffffff;
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+}
+.scroll-prompt {
+    font-size: 1rem;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    animation: bounce 2s infinite;
+}
+.scroll-prompt p {
+    margin: 0 !important;
+}
+.mobile-text { display: none; }
+.desktop-text { display: block; }
+@media (max-width: 768px) {
+    .splash-title { font-size: 1.8rem !important; }
+    .mobile-text { display: block; }
+    .desktop-text { display: none; }
+}
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+}
 </style>
 """, unsafe_allow_html=True)
 
