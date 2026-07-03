@@ -17,154 +17,140 @@ st.set_page_config(
     initial_sidebar_state='expanded'
 )
 
-# ── Initial loading screen overlay ─────────────────────────────────────────────────────
+# ── Initial splash screen overlay ─────────────────────────────────────────────────────
 st.markdown("""
-<div id="initial-page-overlay">
-    <div class="loader">
-        <div class="cup">
-            <div class="cup-handle"></div>
-            <div class="smoke one"></div>
-            <div class="smoke two"></div>
-            <div class="smoke three"></div>
+<div id="splash-screen-overlay">
+    <div class="splash-content">
+        <!-- Title topic for the page -->
+        <h1 class="splash-title">Specialty Tea Buyer Forecast</h1>
+        
+        <!-- The Static Cup (Animations removed) -->
+        <div class="loader">
+            <div class="cup">
+                <div class="cup-handle"></div>
+            </div>
         </div>
-        <div class="load">Loading Page...</div>
+        
+        <!-- Navigation Indicator text -->
+        <div class="scroll-prompt">
+            <p class="desktop-text">Scroll down to get started ↓</p>
+            <p class="mobile-text">Swipe up to get started ↑</p>
+        </div>
     </div>
 </div>
 
 <style>
-    /* 1. START WITH A SOLID BACKGROUND (No transparency here) */
-    #initial-page-overlay {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: #111111 !important; /* Change to #ffffff if you want a white screen */
-        z-index: 9999999 !important; 
+    /* Full-screen initial view section */
+    #splash-screen-overlay {
+        position: relative;
+        width: 100%;
+        height: 85vh; /* Takes up most of the initial vertical viewport */
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        animation: smoothFadeOut 4.5s forwards !important; /* This handles the fade-out */
-        pointer-events: none !important;
+        background: #111111;
+        color: #ffffff;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        border-radius: 12px;
+        margin-bottom: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
+    .splash-content {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .splash-title {
+        font-size: 2.5rem !important;
+        font-weight: 300 !important;
+        letter-spacing: 2px;
+        color: #ffffff !important;
+        margin: 0 !important;
+    }
+
+    /* Your Exact Cup Container (Shaking/pulsing removed) */
     .loader {
-        width: 200px;
-        height: 100px;
+        width: 60px;
+        height: 50px;
         position: relative;
-        animation: shake 3s infinite ease-in-out;
     }
 
     .cup {
         position: absolute;
-        bottom: 20px;
+        bottom: 10px;
         left: 50%;
         transform: translateX(-50%);
-        width: 40px;
-        height: 30px;
+        width: 50px;
+        height: 38px;
         background-color: #5b4022cb;
-        border: 1px solid #2e2e2e;
-        border-radius: 3px 3px 10px 10px;
-        z-index: 1;
-        animation: cupPulse 6s infinite ease-in-out;
+        border: 2px solid #ffffff;
+        border-radius: 3px 3px 12px 12px;
     }
 
     .cup::before {
         content: "";
         position: absolute;
-        bottom: -5px;
+        bottom: -6px;
         width: calc(100% - 2px);
         height: 6px;
         background: #5b4022cb;
-        border: 1px solid #2e2e2e;
+        border: 2px solid #ffffff;
         border-top: none;
         border-radius: 50%;
-        z-index: -1;
-        animation: cupPulse 6s infinite ease-in-out;
     }
 
     .cup::after {
         content: "";
         position: absolute;
         top: -2px;
-        left: 1px;
-        width: calc(100% - 2px);
-        height: 4px;
+        left: 2px;
+        width: calc(100% - 4px);
+        height: 5px;
         background: #da8920ca;
-        border: 1px solid #2e2e2e;
         border-radius: 50%;
-        animation: coffeeGlow 6s infinite ease-in-out;
     }
 
     .cup-handle {
         position: absolute;
-        top: 5px;
-        right: -10px;
-        width: 10px;
-        height: 15px;
-        border: 2px solid #2e2e2e;
+        top: 6px;
+        right: -12px;
+        width: 12px;
+        height: 18px;
+        border: 2px solid #ffffff;
         border-left: none;
         border-radius: 0 10px 10px 0;
-        background: transparent;
     }
 
-    .smoke {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        width: 10px;
-        height: 25px;
-        background: rgba(220, 220, 220, 0.6); 
-        border-radius: 50%;
-        transform: translateX(-50%);
-        animation: rise 3s infinite ease-in-out;
-        filter: blur(5px); 
-    }
-
-    .smoke.one { animation-delay: 0s; }
-    .smoke.two { animation-delay: 0.8s; }
-    .smoke.three { animation-delay: 1.6s; }
-
-    .load {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 12px;
-        color: #ffffff; /* Change to #333333 if using a white background */
+    /* Interactive Scroll text indicator with gentle bounce */
+    .scroll-prompt {
+        font-size: 1rem;
+        letter-spacing: 1px;
         opacity: 0.8;
+        animation: bounce 2s infinite;
     }
 
-    @keyframes rise {
-        0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
-        30% { opacity: 0.7; }
-        60% { opacity: 0.4; }
-        100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
+    .scroll-prompt p {
+        margin: 0 !important;
     }
 
-    @keyframes shake {
-        0% { transform: translateX(0) translateY(0) rotate(0); }
-        25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
-        50% { transform: translateX(0) translateY(0) rotate(0); }
-        75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
-        100% { transform: translateX(0) translateY(0) rotate(0); }
+    /* Responsive display: Toggle texts conditionally based on screen size */
+    .mobile-text { display: none; }
+    .desktop-text { display: block; }
+
+    @media (max-width: 768px) {
+        .splash-title { font-size: 1.8rem !important; }
+        .mobile-text { display: block; }
+        .desktop-text { display: none; }
     }
 
-    @keyframes cupPulse {
-        0%, 100% { background-color: #5b4022cb; }
-        50% { background-color: #f5f5f5bd; }
-    }
-
-    @keyframes coffeeGlow {
-        0%, 100% { background: #da8920ca; }
-        50% { background: #fed197d5; }
-    }
-
-    /* 2. THE BACKGROUND TRANSFORMS TO TRANSPARENT ONLY AT THE VERY END */
-    @keyframes smoothFadeOut {
-        0% { opacity: 1; visibility: visible; }
-        80% { opacity: 1; visibility: visible; }
-        100% { opacity: 0; visibility: hidden; display: none; }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-8px); }
+        60% { transform: translateY(-4px); }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -176,7 +162,7 @@ if 'authenticated' not in st.session_state:
 if not st.session_state['authenticated']:
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     with center_col:
-        st.markdown("<h2 style='text-align: center;'>🔒 Secure Access</h2>",
+        st.markdown("<h2 style='text-align: center;'>Secure Access</h2>",
                     unsafe_allow_html=True)
         with st.form(key='login_form', clear_on_submit=False):
             password = st.text_input('Enter password', type='password',
@@ -443,12 +429,12 @@ def build_pdf(title, chart_fig, tables: dict) -> bytes:
     return bytes(pdf.output())
 
 # ── Main UI ───────────────────────────────────────────────────────────────────
-st.title('♨️ Specialty Tea Buyer Forecast')
+st.title('Specialty Tea Buyer Forecast')
 st.write('Select a buyer, year, and grade to see their monthly forecast.')
 
 # ── Sidebar: Buyer | Year | Grade ────────────────────────────────────────────
 with st.sidebar:
-    st.header('🔍 Filter Options')
+    st.header('Filter Options')
 
     buyer_list     = sorted(forecast['Buyer_Name'].unique().tolist())
     selected_buyer = st.selectbox('Select buyer', buyer_list)
@@ -698,7 +684,7 @@ if selected_year <= 2025:
     )
     title_col, pdf_btn_col = st.columns([5, 1])
     with title_col:
-        st.subheader(f'🗓️ {report_title}')
+        st.subheader(f'{report_title}')
     # pdf_btn_col is filled after chart and table are built below
 
     # ── Dual bar chart ────────────────────────────────────────────────────────
@@ -761,7 +747,7 @@ if selected_year <= 2025:
     st.plotly_chart(fig_hist, use_container_width=True)
 
     # ── Sales table ───────────────────────────────────────────────────────────
-    st.subheader('✍️ Monthly sales table')
+    st.subheader('Monthly Sales Table')
 
     sales_table = hist_plot[['month_label', 'Qty', 'Average']].copy()
     sales_table['Qty']     = sales_table['Qty'].astype(int)
@@ -775,7 +761,7 @@ if selected_year <= 2025:
     st.dataframe(sales_table, use_container_width=True, hide_index=True)
 
     st.download_button(
-        label='⬇️ Download table as CSV',
+        label='⬇️ Download Table',
         data=sales_table.to_csv(index=False),
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_sales.csv',
         mime='text/csv',
@@ -783,7 +769,7 @@ if selected_year <= 2025:
     )
 
     # ── PDF report — placed in the title row column ───────────────────────────
-    with st.spinner('Preparing PDF report...'):
+    with st.spinner('Preparing report...'):
         pdf_bytes_hist = build_pdf(
             title=report_title,
             chart_fig=fig_hist,
@@ -793,7 +779,7 @@ if selected_year <= 2025:
         st.markdown('<div style="margin-top:28px;"></div>',
                     unsafe_allow_html=True)
         st.download_button(
-            label='⬇️ Download Full report',
+            label='⬇️ Download Full Report',
             data=pdf_bytes_hist,
             file_name=(
                 f'{selected_buyer}_{selected_grade}'
@@ -837,7 +823,7 @@ else:
     )
     title_col, pdf_btn_col = st.columns([5, 1])
     with title_col:
-        st.subheader(f'🗓️ {report_title}')
+        st.subheader(f'{report_title}')
     # pdf_btn_col is filled after all data is built below
 
     # ── Triple bar chart ──────────────────────────────────────────────────────
@@ -997,11 +983,11 @@ else:
             st.stop()
 
     # ── Forecast table ────────────────────────────────────────────────────────
-    st.subheader('📋 Forecast table')
+    st.subheader('Forecast Table')
     st.dataframe(display_table, use_container_width=True, hide_index=True)
 
     st.download_button(
-        label='⬇️ Download forecast as CSV',
+        label='⬇️ Download Forecast',
         data=download_table.to_csv(index=False),
         file_name=f'{selected_buyer}_{selected_grade}_{selected_year}_forecast.csv',
         mime='text/csv',
@@ -1009,7 +995,7 @@ else:
     )
 
     # ── Historical reference table — not affected by toggle ───────────────────
-    st.subheader('🕰️ Historical purchase data')
+    st.subheader('Historical Purchase Data')
     st.write('Actual purchase records used to train the model for this buyer and grade.')
 
     hist_all = (
@@ -1064,7 +1050,7 @@ else:
         st.dataframe(hist_display, use_container_width=True, hide_index=True)
 
         st.download_button(
-            label='⬇️ Download historical data as CSV',
+            label='⬇️ Download Table',
             data=hist_download.to_csv(index=False),
             file_name=f'{selected_buyer}_{selected_grade}_history.csv',
             mime='text/csv',
@@ -1076,7 +1062,7 @@ else:
     if hist_download is not None:
         tables_for_pdf['Historical Purchase Data'] = hist_download
 
-    with st.spinner('Preparing PDF report...'):
+    with st.spinner('Preparing report...'):
         pdf_bytes_fcst = build_pdf(
             title=report_title,
             chart_fig=fig,
