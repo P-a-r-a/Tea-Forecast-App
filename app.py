@@ -581,7 +581,7 @@ else:
             'expected_qty': 'Predicted Quantity (bags)', 'probability_wtd_qty': 'Weighted Quantity (bags)',
         })[['Month', 'Probability of Purchase', 'Likelihood', 'Predicted Quantity (bags)', 'Weighted Quantity (bags)']]
 
-        show_above_50 = st.toggle('Show only months with 🟢 High probability (≥ 50%)', value=False)
+        show_above_50 = st.toggle('Show only months with 🟢 High probability (≥ 70%)', value=False)
         display_table  = forecast_display.copy()
         download_table = forecast_download.copy()
 
