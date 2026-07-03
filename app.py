@@ -197,9 +197,12 @@ if not st.session_state['authenticated']:
 def load_data():
     forecast   = pd.read_csv('forecast.csv')
     historical = pd.read_csv('historical.csv')
-    return forecast, historical
 
-forecast, historical = load_data()
+    # Ensure month and year are always int so merges work correctly
+    forecast['month'] = forecast['month'].astype(int)
+    forecast['year']  = forecast['year'].astype(int)
+
+    return forecast, historical
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 ALL_GRADES  = ['GOLDENTIPS', 'INNOVATIVE', 'SILVERTIPS']
