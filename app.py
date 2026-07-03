@@ -21,16 +21,18 @@ st.set_page_config(
 st.markdown("""
 <div id="initial-page-overlay">
     <div class="loader">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
+        <div class="cup">
+            <div class="cup-handle"></div>
+            <div class="smoke one"></div>
+            <div class="smoke two"></div>
+            <div class="smoke three"></div>
+        </div>
+        <div class="load">Loading...</div>
     </div>
 </div>
 
 <style>
-    /* Full-screen masking layout wrapper */
+    /* Full-screen overlay container that positions your loader exactly in the center */
     #initial-page-overlay {
         position: fixed;
         top: 0;
@@ -42,39 +44,135 @@ st.markdown("""
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        animation: smoothFadeOut 3.2s forwards;
+        animation: smoothFadeOut 3.5s forwards;
         pointer-events: none;
     }
 
     /* Your exact custom Loader CSS */
     .loader {
-        display: flex;
-        gap: 12px; /* Adds clean spacing between your jumping dots */
+        width: 100px;
+        height: 100px;
+        position: relative;
+        animation: shake 3s infinite ease-in-out;
     }
 
-    .loader .dot {
-        height: 20px;
-        width: 20px;
+    .cup {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 30px;
+        background-color: #5b4022cb;
+        border: 1px solid #2e2e2e;
+        border-radius: 3px 3px 10px 10px;
+        z-index: 1;
+        animation: cupPulse 6s infinite ease-in-out;
+    }
+
+    .cup::before {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        width: calc(100% - 2px);
+        height: 6px;
+        background: #5b4022cb;
+        border: 1px solid #2e2e2e;
+        border-top: none;
         border-radius: 50%;
-        border: 2px solid #e8e8e8;
-        background: #16b0c1;
-        animation: jump 0.8s ease-in-out infinite alternate;
+        z-index: -1;
+        animation: cupPulse 6s infinite ease-in-out;
     }
 
-    @keyframes jump {
+    .cup::after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 1px;
+        width: calc(100% - 2px);
+        height: 4px;
+        background: #da8920ca;
+        border: 1px solid #2e2e2e;
+        border-radius: 50%;
+        animation: coffeeGlow 6s infinite ease-in-out;
+    }
+
+    .cup-handle {
+        position: absolute;
+        top: 5px;
+        right: -10px;
+        width: 10px;
+        height: 15px;
+        border: 2px solid #2e2e2e;
+        border-left: none;
+        border-radius: 0 10px 10px 0;
+        background: transparent;
+    }
+
+    .smoke {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        width: 10px;
+        height: 25px;
+        background: rgba(150, 150, 150, 0.5); /* Boosted visibility against dark background */
+        border-radius: 50%;
+        transform: translateX(-50%);
+        animation: rise 3s infinite ease-in-out;
+        filter: blur(5px); /* Slightly reduced blur to keep it sharp on screens */
+    }
+
+    .smoke.one { animation-delay: 0s; }
+    .smoke.two { animation-delay: 0.8s; }
+    .smoke.three { animation-delay: 1.6s; }
+
+    .load {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        color: #ffffff; /* Changed to white to match your #111 screen background */
+        opacity: 0.7;
+    }
+
+    /* Keyframe Animations */
+    @keyframes rise {
+        0% {
+            transform: translate(-50%, 0) scale(0.4);
+            opacity: 0;
+        }
+        30% {
+            opacity: 0.7;
+        }
+        60% {
+            opacity: 0.4;
+        }
         100% {
-            background: #661e92;
-            transform: translateY(-3rem) scale(1.9);
+            transform: translate(-50%, -120px) scale(1);
+            opacity: 0;
         }
     }
 
-    .loader .dot:nth-child(1) { animation-delay: 0.1s; }
-    .loader .dot:nth-child(2) { animation-delay: 0.2s; }
-    .loader .dot:nth-child(3) { animation-delay: 0.3s; }
-    .loader .dot:nth-child(4) { animation-delay: 0.4s; }
-    .loader .dot:nth-child(5) { animation-delay: 0.5s; }
+    @keyframes shake {
+        0% { transform: translateX(0) translateY(0) rotate(0); }
+        25% { transform: translateX(-4px) translateY(-2px) rotate(-2deg); }
+        50% { transform: translateX(0) translateY(0) rotate(0); }
+        75% { transform: translateX(4px) translateY(-2px) rotate(2deg); }
+        100% { transform: translateX(0) translateY(0) rotate(0); }
+    }
 
-    /* CSS transition layout handler to hand control back to Streamlit */
+    @keyframes cupPulse {
+        0%, 100% { background-color: #5b4022cb; }
+        50% { background-color: #f5f5f5bd; }
+    }
+
+    @keyframes coffeeGlow {
+        0%, 100% { background: #da8920ca; }
+        50% { background: #fed197d5; }
+    }
+
+    /* Graceful fade out to natively transition into your app layout */
     @keyframes smoothFadeOut {
         0% { opacity: 1; visibility: visible; }
         75% { opacity: 1; visibility: visible; }
