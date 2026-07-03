@@ -37,7 +37,7 @@ st.markdown("""
 #splash-screen-overlay {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
