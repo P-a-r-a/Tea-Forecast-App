@@ -24,7 +24,7 @@ st.markdown("""
         background: #111; color: #fff; z-index: 99999;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
         font-family: 'Helvetica Neue', sans-serif;
-        animation: fadeOut 1.2s forwards;
+        animation: shake 3s infinite ease-in-out;
         animation-delay: 0.8s;
         pointer-events: none;">
         <div class="cup">
@@ -36,12 +36,6 @@ st.markdown("""
         <div class="load">Loading...</div>
     </div>
     <style>
-        .loader {
-        width: 100px;
-        height: 100px;
-        position: relative;
-        animation: shake 3s infinite ease-in-out;
-        }
 
         .cup {
         position: absolute;
