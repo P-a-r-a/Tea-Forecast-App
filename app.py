@@ -36,7 +36,7 @@ st.markdown("""
 <style>
 #splash-screen-overlay {
     position: relative;
-    width: 100%;
+    width: 100vh;
     height: 100vh;
     display: flex !important;
     justify-content: center !important;
@@ -138,6 +138,8 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
+    st.markdown('<div id="auth-section">', unsafe_allow_html=True)
+
     pad_left, center_col, pad_right = st.columns([3.5, 3, 3.5])
     with center_col:
         st.markdown("<h2 style='text-align: center;'>Secure Access</h2>",
@@ -148,12 +150,12 @@ if not st.session_state['authenticated']:
             btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
             with btn_col:
                 submit_button = st.form_submit_button(
-                    label='Login', use_container_width=True)
+                    label='Login', width='stretch')
         if submit_button:
             if password == st.secrets['APP_PASSWORD']:
                 st.session_state['authenticated'] = True
                 
-                # Display a full-screen overlay with a decryption animation
+                # Display a full-screen overlay with a loading animation
                 st.markdown("""
                 <div id="initial-page-overlay">
                     <div class="loader">
@@ -168,19 +170,18 @@ if not st.session_state['authenticated']:
                 </div>
 
                 <style>
-                    /* 1. START WITH A SOLID BACKGROUND (No transparency here) */
                     #initial-page-overlay {
                         position: fixed !important;
                         top: 0 !important;
                         left: 0 !important;
                         width: 100vw !important;
                         height: 100vh !important;
-                        background: #111111 !important; /* Change to #ffffff if you want a white screen */
+                        background: #111111 !important;
                         z-index: 9999999 !important; 
                         display: flex !important;
                         justify-content: center !important;
                         align-items: center !important;
-                        animation: smoothFadeOut 4.5s forwards !important; /* This handles the fade-out */
+                        animation: smoothFadeOut 4.5s forwards !important;
                         pointer-events: none !important;
                     }
 
@@ -267,7 +268,7 @@ if not st.session_state['authenticated']:
                         left: 50%;
                         transform: translateX(-50%);
                         font-size: 12px;
-                        color: #ffffff; /* Change to #333333 if using a white background */
+                        color: #ffffff;
                         opacity: 0.8;
                     }
 
@@ -296,7 +297,6 @@ if not st.session_state['authenticated']:
                         50% { background: #fed197d5; }
                     }
 
-                    /* 2. THE BACKGROUND TRANSFORMS TO TRANSPARENT ONLY AT THE VERY END */
                     @keyframes smoothFadeOut {
                         0% { opacity: 1; visibility: visible; }
                         80% { opacity: 1; visibility: visible; }
@@ -305,10 +305,11 @@ if not st.session_state['authenticated']:
                 </style>
                 """, unsafe_allow_html=True)
                 time.sleep(1.5)
-                
                 st.rerun()
             else:
                 st.error('Incorrect password.')
+
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # ── Load data ─────────────────────────────────────────────────────────────────
