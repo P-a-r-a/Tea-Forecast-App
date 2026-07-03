@@ -565,9 +565,10 @@ with st.sidebar:
 
             .load {
                 position: absolute;
-                width: 100px;
+                width: 150px;
                 bottom: 0;
                 left: 50%;
+                text-align: center;
                 transform: translateX(-50%);
                 font-size: 12px;
                 color: #ffffff; /* Change to #333333 if using a white background */
