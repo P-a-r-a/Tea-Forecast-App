@@ -487,7 +487,7 @@ with st.sidebar:
             }
 
             .loader {
-                width: 400px;
+                width: 1000px;
                 height: 100px;
                 position: relative;
                 animation: shake 3s infinite ease-in-out;
