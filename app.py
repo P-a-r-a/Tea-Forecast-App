@@ -49,7 +49,7 @@ st.markdown("""
     }
 
     .loader {
-        width: 100px;
+        width: 200px;
         height: 100px;
         position: relative;
         animation: shake 3s infinite ease-in-out;
@@ -221,7 +221,7 @@ if not st.session_state['authenticated']:
                     }
 
                     .loader {
-                        width: 100px;
+                        width: 200px;
                         height: 100px;
                         position: relative;
                         animation: shake 3s infinite ease-in-out;
@@ -487,7 +487,7 @@ with st.sidebar:
             }
 
             .loader {
-                width: 100px;
+                width: 200px;
                 height: 100px;
                 position: relative;
                 animation: shake 3s infinite ease-in-out;
