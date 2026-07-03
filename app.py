@@ -20,24 +20,24 @@ st.set_page_config(
 # ── Initial splash screen overlay ─────────────────────────────────────────────────────
 st.markdown("""
 <div id="splash-screen-overlay">
-<div class="splash-content">
-<h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
-<div class="loader">
-<div class="cup">
-<div class="cup-handle"></div>
-</div>
-</div>
-<div class="scroll-prompt">
-<p class="desktop-text">Scroll down to get started ↓</p>
-<p class="mobile-text">Swipe up to get started ↑</p>
-</div>
-</div>
+    <div class="splash-content">
+        <h1 class="splash-title">♨️ Specialty Tea Buyer Forecast</h1>
+        <div class="loader">
+            <div class="cup">
+                <div class="cup-handle"></div>
+            </div>
+        </div>
+        <div class="scroll-prompt">
+            <p class="desktop-text">Scroll down to get started ↓</p>
+            <p class="mobile-text">Swipe up to get started ↑</p>
+        </div>
+    </div>
 </div>
 <style>
 #splash-screen-overlay {
     position: relative;
     width: 100%;
-    height: 75vh;
+    height: 100%;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
