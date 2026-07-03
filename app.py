@@ -322,7 +322,7 @@ with st.sidebar:
                 left: 0 !important;
                 width: 100vw !important;
                 height: 100vh !important;
-                background: var(--background-color) !important;
+                background: var(--background-color, #111111) !important;
                 z-index: 9999999 !important; 
                 display: flex !important;
                 justify-content: center !important;
