@@ -37,7 +37,7 @@ st.markdown("""
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0);
+        background: #111111;
         z-index: 99999;
         display: flex !important;
         justify-content: center !important;
