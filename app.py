@@ -322,7 +322,7 @@ with st.sidebar:
                 left: 0 !important;
                 width: 100vw !important;
                 height: 100vh !important;
-                background: var(--background-color, #111111) !important;
+                background: var(--background-color) !important;
                 z-index: 9999999 !important; 
                 display: flex !important;
                 justify-content: center !important;
@@ -420,7 +420,7 @@ with st.sidebar:
                 text-align: center;
                 transform: translateX(-50%);
                 font-size: 12px;
-                color: var(--text-color) !important;
+                color: var(--text-color, #ffffff) !important;
                 opacity: 0.8;
             }
 
