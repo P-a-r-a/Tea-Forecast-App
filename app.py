@@ -33,6 +33,8 @@ if not st.session_state['authenticated']:
             btn_pad_l, btn_col, btn_pad_r = st.columns([1, 1, 1])
             with btn_col:
                 submit_button = st.form_submit_button(label='Login', width='stretch')
+
+        with st.write('The password is 12345')
                 
         if submit_button:
             if password == st.secrets['APP_PASSWORD']:
